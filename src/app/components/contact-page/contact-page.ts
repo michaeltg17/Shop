@@ -7,13 +7,7 @@ import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angula
 
 @Component({
   selector: 'app-contact-page',
-  imports: [
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    ReactiveFormsModule
-  ],
+  imports: [MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, ReactiveFormsModule],
   templateUrl: './contact-page.html',
   styleUrls: ['./contact-page.css']
 })
@@ -36,8 +30,16 @@ export class ContactPage {
     }
   }
 
-  get name() { return this.contactForm.get('name'); }
-  get email() { return this.contactForm.get('email'); }
-  get subject() { return this.contactForm.get('subject'); }
-  get message() { return this.contactForm.get('message'); }
+  get name() {
+    return this.contactForm.get('name');
+  }
+  get email() {
+    return this.contactForm.get('email');
+  }
+  get subject() {
+    return this.contactForm.get('subject');
+  }
+  get message() {
+    return this.contactForm.get('message');
+  }
 }

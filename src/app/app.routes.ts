@@ -12,7 +12,13 @@ import { AuthGuard } from './guards/auth.guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginPage },
-  { path: 'customers', component: CustomersTable, canDeactivate: [PendingChangesGuard], runGuardsAndResolvers: 'always', canActivate: [AuthGuard] },
+  {
+    path: 'customers',
+    component: CustomersTable,
+    canDeactivate: [PendingChangesGuard],
+    runGuardsAndResolvers: 'always',
+    canActivate: [AuthGuard]
+  },
   {
     path: 'customers/new',
     component: CustomersTable,

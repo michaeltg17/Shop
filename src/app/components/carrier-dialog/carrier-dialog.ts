@@ -1,11 +1,4 @@
-import {
-  Component,
-  Inject,
-  OnInit,
-  inject,
-  ChangeDetectionStrategy,
-  signal
-} from '@angular/core';
+import { Component, Inject, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Carrier } from '../../models/carrier';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';

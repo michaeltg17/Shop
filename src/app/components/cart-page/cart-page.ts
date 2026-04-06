@@ -57,7 +57,7 @@ export class CartPage implements OnInit, OnDestroy {
   }
 
   calculateTotals(): void {
-    this.subtotal = this.cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+    this.subtotal = this.cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
     this.total = this.subtotal + this.shipping;
   }
 

@@ -27,32 +27,34 @@ export class CarrierService {
     setTimeout(() => {
       try {
         const storedCarriers = localStorage.getItem('carriers');
-        const carriers = storedCarriers ? JSON.parse(storedCarriers) : [
-          {
-            id: 1,
-            name: 'UPS',
-            trackingUrl: 'https://www.ups.com/track',
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 2,
-            name: 'FedEx',
-            trackingUrl: 'https://www.fedex.com/apps/fedextrack/',
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          },
-          {
-            id: 3,
-            name: 'USPS',
-            trackingUrl: 'https://tools.usps.com/go/TrackConfirmAction_input',
-            isActive: true,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }
-        ];
+        const carriers = storedCarriers
+          ? JSON.parse(storedCarriers)
+          : [
+              {
+                id: 1,
+                name: 'UPS',
+                trackingUrl: 'https://www.ups.com/track',
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              },
+              {
+                id: 2,
+                name: 'FedEx',
+                trackingUrl: 'https://www.fedex.com/apps/fedextrack/',
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              },
+              {
+                id: 3,
+                name: 'USPS',
+                trackingUrl: 'https://tools.usps.com/go/TrackConfirmAction_input',
+                isActive: true,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              }
+            ];
 
         this.carriers.set(carriers);
         this.carriersSubject.next(carriers);
@@ -98,9 +100,7 @@ export class CarrierService {
     setTimeout(() => {
       try {
         const currentCarriers = this.carriers();
-        const updatedCarriers = currentCarriers.map(c =>
-          c.id === carrier.id ? { ...carrier, updatedAt: new Date() } : c
-        );
+        const updatedCarriers = currentCarriers.map(c => (c.id === carrier.id ? { ...carrier, updatedAt: new Date() } : c));
 
         this.carriers.set(updatedCarriers);
         this.carriersSubject.next(updatedCarriers);
@@ -135,9 +135,7 @@ export class CarrierService {
 
   private generateId(): number {
     const currentCarriers = this.carriers();
-    return currentCarriers.length > 0
-      ? Math.max(...currentCarriers.map(c => c.id)) + 1
-      : 1;
+    return currentCarriers.length > 0 ? Math.max(...currentCarriers.map(c => c.id)) + 1 : 1;
   }
 
   private saveCarriers(carriers: Carrier[]): void {

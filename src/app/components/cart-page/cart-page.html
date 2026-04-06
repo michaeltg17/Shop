@@ -17,7 +17,9 @@
           <p class="price">Price: ${{ item.product.price }}</p>
         </div>
         <div class="item-controls">
-          <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="btn btn-outline">-</button>
+          <button (click)="updateQuantity(item, item.quantity - 1)" [disabled]="item.quantity <= 1" class="btn btn-outline">
+            -
+          </button>
           <span class="quantity">{{ item.quantity }}</span>
           <button (click)="updateQuantity(item, item.quantity + 1)" class="btn btn-outline">+</button>
           <button (click)="removeItem(item)" class="btn btn-danger">Remove</button>

@@ -6,7 +6,8 @@
     margin-bottom: 30px;
   }
 
-  .loading, .error {
+  .loading,
+  .error {
     text-align: center;
     padding: 20px;
     font-size: 18px;
@@ -49,7 +50,7 @@
       margin: 16px 0 0 0;
       font-size: 24px;
       font-weight: bold;
-      color: #2196F3;
+      color: #2196f3;
     }
 
     .btn {
@@ -63,12 +64,12 @@
     }
 
     .btn-primary {
-      background-color: #2196F3;
+      background-color: #2196f3;
       color: white;
     }
 
     .btn-primary:hover {
-      background-color: #1976D2;
+      background-color: #1976d2;
     }
   }
 }

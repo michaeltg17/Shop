@@ -9,12 +9,7 @@ import { signal } from '@angular/core';
 
 @Component({
   selector: 'app-products-page',
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatCardModule,
-    MatIconModule
-  ],
+  imports: [CommonModule, MatButtonModule, MatCardModule, MatIconModule],
   templateUrl: './products-page.html',
   styleUrls: ['./products-page.scss']
 })
@@ -34,11 +29,11 @@ export class ProductsPage implements OnInit {
     this.error.set(null);
 
     this.productService.loadProducts().subscribe({
-      next: (products) => {
+      next: products => {
         this.products.set(products);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: err => {
         this.error.set('Failed to load products');
         this.loading.set(false);
         console.error('Error loading products:', err);

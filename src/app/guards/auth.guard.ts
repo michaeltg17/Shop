@@ -5,7 +5,6 @@ import { CanActivate, Router, UrlTree } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthGuard implements CanActivate {
-
   private router = inject(Router);
 
   canActivate(): boolean | UrlTree {

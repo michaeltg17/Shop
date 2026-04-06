@@ -9,62 +9,45 @@
       <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Name</mat-label>
-          <input matInput formControlName="name" placeholder="Enter your name">
-          @if (name?.invalid && name?.touched) {
-            @if (name?.errors?.['required']) {
-              <mat-error>Name is required</mat-error>
-            }
-            @if (name?.errors?.['minlength']) {
-              <mat-error>Name must be at least 2 characters</mat-error>
-            }
-          }
+          <input matInput formControlName="name" placeholder="Enter your name" />
+          @if (name?.invalid && name?.touched) { @if (name?.errors?.['required']) {
+          <mat-error>Name is required</mat-error>
+          } @if (name?.errors?.['minlength']) {
+          <mat-error>Name must be at least 2 characters</mat-error>
+          } }
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Email</mat-label>
-          <input matInput formControlName="email" type="email" placeholder="Enter your email">
-          @if (email?.invalid && email?.touched) {
-            @if (email?.errors?.['required']) {
-              <mat-error>Email is required</mat-error>
-            }
-            @if (email?.errors?.['email']) {
-              <mat-error>Please enter a valid email</mat-error>
-            }
-          }
+          <input matInput formControlName="email" type="email" placeholder="Enter your email" />
+          @if (email?.invalid && email?.touched) { @if (email?.errors?.['required']) {
+          <mat-error>Email is required</mat-error>
+          } @if (email?.errors?.['email']) {
+          <mat-error>Please enter a valid email</mat-error>
+          } }
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Subject</mat-label>
-          <input matInput formControlName="subject" placeholder="Enter subject">
-          @if (subject?.invalid && subject?.touched) {
-            @if (subject?.errors?.['required']) {
-              <mat-error>Subject is required</mat-error>
-            }
-            @if (subject?.errors?.['minlength']) {
-              <mat-error>Subject must be at least 5 characters</mat-error>
-            }
-          }
+          <input matInput formControlName="subject" placeholder="Enter subject" />
+          @if (subject?.invalid && subject?.touched) { @if (subject?.errors?.['required']) {
+          <mat-error>Subject is required</mat-error>
+          } @if (subject?.errors?.['minlength']) {
+          <mat-error>Subject must be at least 5 characters</mat-error>
+          } }
         </mat-form-field>
 
         <mat-form-field appearance="fill" class="full-width">
           <mat-label>Message</mat-label>
           <textarea matInput formControlName="message" placeholder="Enter your message" rows="5"></textarea>
-          @if (message?.invalid && message?.touched) {
-            @if (message?.errors?.['required']) {
-              <mat-error>Message is required</mat-error>
-            }
-            @if (message?.errors?.['minlength']) {
-              <mat-error>Message must be at least 10 characters</mat-error>
-            }
-          }
+          @if (message?.invalid && message?.touched) { @if (message?.errors?.['required']) {
+          <mat-error>Message is required</mat-error>
+          } @if (message?.errors?.['minlength']) {
+          <mat-error>Message must be at least 10 characters</mat-error>
+          } }
         </mat-form-field>
 
-        <button
-          mat-raised-button
-          color="primary"
-          type="submit"
-          [disabled]="contactForm.invalid"
-          class="submit-button">
+        <button mat-raised-button color="primary" type="submit" [disabled]="contactForm.invalid" class="submit-button">
           Send Message
         </button>
       </form>
