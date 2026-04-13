@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: 'e2e',
+  testDir: 'playwright',
   timeout: 5000,
   fullyParallel: false,
   reporter: [['list']],
@@ -16,10 +16,10 @@ export default defineConfig({
     reuseExistingServer: true
   },
   projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } }
+    { name: 'chromium', use: { browserName: 'chromium' } },
     // { name: 'firefox', use: { browserName: 'firefox' } },
     // { name: 'webkit', use: { browserName: 'webkit' } },
     // { name: 'mobile-safari', use: { ...devices['iPhone 14'] } }
   ],
-  workers: 1
+  workers: '100%'
 });
