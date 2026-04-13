@@ -2,13 +2,17 @@
   "name": "angular-app",
   "version": "1.0.0",
   "scripts": {
-    "start": "ng serve",
-    "build": "ng build",
     "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json,md}\"",
     "format": "prettier --write \"src/**/*.{ts,html,css,scss,json,md}\"",
     "lint": "ng lint",
-    "test": "playwright test",
-    "test:install": "npx playwright install"
+    "test": "ng test",
+    "build": "ng build",
+    "start": "ng serve",
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json,md}\"",
+    "format": "prettier --write \"src/**/*.{ts,html,css,scss,json,md}\"",
+    "lint": "ng lint",
+    "integration:test": "playwright test",
+    "integration:test:install": "npx playwright install"
   },
   "private": true,
   "dependencies": {
