@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-import { TitleService } from './core/services/title.service';
 import { ActivatedRoute } from '@angular/router';
 
 describe('App', () => {

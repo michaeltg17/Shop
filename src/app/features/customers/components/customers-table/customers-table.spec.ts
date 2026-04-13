@@ -4,7 +4,7 @@ import { CustomersTable } from './customers-table';
 import { CustomerService } from '../../customer.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterState } from '@angular/router';
 import { PendingChangesService } from '../../../../core/services/pending-changes.service';
 import { of } from 'rxjs';
 
@@ -35,7 +35,7 @@ describe('CustomersTable', () => {
 
     dialog = {
       open: vi.fn(),
-      afterClosed: vi.fn().mockReturnValue({ subscribe: (fn: Function) => fn() }),
+      afterClosed: vi.fn().mockReturnValue({ subscribe: (fn: () => void) => fn() }),
     } as Partial<MatDialog>;
 
     const routeSnapshot = {
@@ -60,7 +60,7 @@ describe('CustomersTable', () => {
 
     router = {
       navigate: vi.fn(),
-      routerState: routerState as any,
+      routerState: routerState as unknown as RouterState,
       events: of(),
     };
 

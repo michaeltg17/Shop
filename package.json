@@ -5,12 +5,9 @@
     "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json,md}\"",
     "format": "prettier --write \"src/**/*.{ts,html,css,scss,json,md}\"",
     "lint": "ng lint",
-    "test": "ng test",
+    "test": "ng test --no-watch",
     "build": "ng build",
     "start": "ng serve",
-    "format:check": "prettier --check \"src/**/*.{ts,html,css,scss,json,md}\"",
-    "format": "prettier --write \"src/**/*.{ts,html,css,scss,json,md}\"",
-    "lint": "ng lint",
     "integration:test": "playwright test",
     "integration:test:install": "npx playwright install"
   },

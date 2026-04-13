@@ -3,7 +3,6 @@ import { CustomerDialog } from './customer-dialog';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PendingChangesService } from '../../../../core/services/pending-changes.service';
 import { DialogMode } from '../../../../core/models/dialogMode';
-import { Customer } from '../../customer';
 
 describe('CustomerDialog', () => {
   let component: CustomerDialog;

@@ -85,7 +85,9 @@ describe('CartPage', () => {
 
   it('should navigate to products on checkout', () => {
     component.cartItems = [{ product: mockProduct, quantity: 1 }];
-    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    vi.spyOn(window, 'alert').mockImplementation(() => {
+      /* empty */
+    });
     component.checkout();
     expect(router.navigate).toHaveBeenCalledWith(['/products']);
   });

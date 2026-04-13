@@ -29,7 +29,7 @@ describe('CarriersPage', () => {
 
     dialog = {
       open: vi.fn(),
-      afterClosed: vi.fn().mockReturnValue({ subscribe: (fn: Function) => fn() }),
+      afterClosed: vi.fn().mockReturnValue({ subscribe: (fn: () => void) => fn() }),
     } as Partial<MatDialog>;
 
     await TestBed.configureTestingModule({

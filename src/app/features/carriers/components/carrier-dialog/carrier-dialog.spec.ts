@@ -1,21 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CarrierDialog } from './carrier-dialog';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Carrier } from '../../carrier';
 
 describe('CarrierDialog', () => {
   let component: CarrierDialog;
   let fixture: ComponentFixture<CarrierDialog>;
   let dialogRefSpy: Partial<MatDialogRef<CarrierDialog>>;
-
-  const mockCarrier: Carrier = {
-    id: 1,
-    name: 'Test Carrier',
-    trackingUrl: 'https://example.com',
-    isActive: true,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
 
   beforeEach(async () => {
     dialogRefSpy = {
@@ -57,7 +47,11 @@ describe('CarrierDialog', () => {
     fixture = TestBed.createComponent(CarrierDialog);
     component = fixture.componentInstance;
     component.ngOnInit();
-    component.carrierForm.patchValue({ name: 'Test', trackingUrl: 'https://test.com', isActive: true });
+    component.carrierForm.patchValue({
+      name: 'Test',
+      trackingUrl: 'https://test.com',
+      isActive: true,
+    });
     component.onSubmit();
     expect(dialogRefSpy.close).toHaveBeenCalled();
   });
