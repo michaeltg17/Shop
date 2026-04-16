@@ -57,7 +57,12 @@ export class ProductsPage implements OnInit {
     // Get existing cart items from localStorage
     const cartData = localStorage.getItem('shoppingCart');
     if (cartData) {
-      cartItems = JSON.parse(cartData);
+      try {
+        cartItems = JSON.parse(cartData);
+      } catch {
+        // If JSON is invalid, start with empty cart
+        cartItems = [];
+      }
     }
 
     // Check if product is already in cart

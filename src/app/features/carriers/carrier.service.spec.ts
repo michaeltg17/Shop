@@ -57,10 +57,6 @@ describe('CarrierService', () => {
     expect(service.carriers()).toEqual([mockCarrier]);
   });
 
-  it.skip('should not reload carriers if already loaded', () => {
-    // Skipping due to service implementation
-  });
-
   it('should handle load carriers error', () => {
     service.loadCarriers();
     expect(service.loading()).toBe(true);
@@ -70,10 +66,6 @@ describe('CarrierService', () => {
 
     expect(service.loading()).toBe(false);
     expect(service.error()).toBe('Failed to load carriers');
-  });
-
-  it.skip('should convert string isActive to boolean', () => {
-    // Skipping due to service implementation
   });
 
   it('should add a carrier', () => {
