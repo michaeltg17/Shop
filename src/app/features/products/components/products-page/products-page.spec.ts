@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ProductsPage } from './products-page';
 import { ProductService } from '../../product.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Product } from '../../product';
 
 describe('ProductsPage', () => {
@@ -88,5 +88,31 @@ describe('ProductsPage', () => {
     });
     component.addToCart(mockProduct);
     expect(eventSpy).toHaveBeenCalled();
+  });
+
+  it('should handle error when loading products', () => {
+    const error = new Error('Network error');
+    productService.loadProducts = vi.fn().mockReturnValue(throwError(() => error));
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    
+    component.loadProducts();
+    
+    expect(productService.loadProducts).toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith('Error loading products:', error);
+  });
+
+  it('should handle invalid JSON in localStorage', () => {
+    localStorage.clear();
+    localStorage.setItem('shoppingCart', 'invalid-json-data');
+    vi.spyOn(window, 'alert').mockImplementation(() => {
+      /* empty */
+    });
+    
+    component.addToCart(mockProduct);
+    
+    const cartData = localStorage.getItem('shoppingCart');
+    const cart = cartData ? JSON.parse(cartData) : [];
+    expect(cart.length).toBe(1);
+    expect(cart[0].quantity).toBe(1);
   });
 });

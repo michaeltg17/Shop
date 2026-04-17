@@ -246,6 +246,7 @@ describe('CustomersTable', () => {
 
 describe('CustomersTable - Dialog Methods', () => {
   let component: CustomersTable;
+  let fixture: ComponentFixture<CustomersTable>;
   let customerService: Partial<CustomerService>;
   let snackBar: Partial<MatSnackBar>;
   let route: ActivatedRoute;
@@ -328,7 +329,7 @@ describe('CustomersTable - Dialog Methods', () => {
       ],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(CustomersTable);
+    fixture = TestBed.createComponent(CustomersTable);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -412,5 +413,19 @@ describe('CustomersTable - Dialog Methods', () => {
     component.selection.select(mockCustomer);
     component.deleteCustomers();
     expect(openSpy).toHaveBeenCalled();
+  });
+
+  it('should not delete customers when user cancels', () => {
+    const dialogRefMock = {
+      afterClosed: () => of(false),
+      close: vi.fn(),
+    };
+    const openSpy = vi.fn().mockReturnValue(dialogRefMock);
+    (component['dialog'] as MatDialog).open = openSpy;
+
+    component.selection.select(mockCustomer);
+    component.deleteCustomers();
+
+    expect(customerService.deleteCustomers).not.toHaveBeenCalled();
   });
 });
