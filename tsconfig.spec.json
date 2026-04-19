@@ -2,13 +2,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "rootDir": "./src/app",
-    "types": [
-      "jest"
-    ]
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
+    "types": ["jest"]
   },
-  "include": [
-    "src/**/*.d.ts",
-    "src/**/*.spec.ts"
-  ]
+  "include": ["src/**/*.ts"]
 }

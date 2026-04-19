@@ -7,7 +7,7 @@ module.exports = {
   testRunner: 'jest',
   jest: {
     projectType: 'custom',
-    configFile: 'jest.config.js'
+    configFile: 'jest.config.ts'
   },
   reporters: ['html', 'clear-text', 'progress'],
   coverageAnalysis: 'off',
