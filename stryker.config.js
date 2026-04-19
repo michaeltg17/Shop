@@ -10,7 +10,7 @@ module.exports = {
     configFile: 'jest.config.js'
   },
   reporters: ['html', 'clear-text', 'progress'],
-  coverageAnalysis: 'off', // safer default for Angular + Jest
+  coverageAnalysis: 'off',
   tsconfigFile: 'tsconfig.json',
-  cleanTempDir: true
+  cleanTempDir: 'always',
 };
