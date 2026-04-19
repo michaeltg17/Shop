@@ -93,10 +93,12 @@ describe('ProductsPage', () => {
   it('should handle error when loading products', () => {
     const error = new Error('Network error');
     productService.loadProducts = vi.fn().mockReturnValue(throwError(() => error));
-    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Intentionally empty to suppress console output
+    });
+
     component.loadProducts();
-    
+
     expect(productService.loadProducts).toHaveBeenCalled();
     expect(errorSpy).toHaveBeenCalledWith('Error loading products:', error);
   });
@@ -107,9 +109,9 @@ describe('ProductsPage', () => {
     vi.spyOn(window, 'alert').mockImplementation(() => {
       /* empty */
     });
-    
+
     component.addToCart(mockProduct);
-    
+
     const cartData = localStorage.getItem('shoppingCart');
     const cart = cartData ? JSON.parse(cartData) : [];
     expect(cart.length).toBe(1);
