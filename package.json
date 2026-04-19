@@ -26,8 +26,8 @@
     "tslib": "^2.3.0"
   },
   "devDependencies": {
-    "@angular/build": "^21.2.6",
-    "@angular/cli": "^21.2.6",
+    "@angular/build": "^21.2.7",
+    "@angular/cli": "^21.2.7",
     "@angular/compiler-cli": "^21.2.7",
     "@playwright/test": "^1.43.0",
     "@prettier/plugin-xml": "^3.4.2",
