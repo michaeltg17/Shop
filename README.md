@@ -7,6 +7,8 @@
 
 ### Testing
 
+- Jest (for stryker compatibility)
+- Stryker
 - MSW (Mock Service Worker)
 - Playwright
 
