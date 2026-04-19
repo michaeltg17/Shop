@@ -2,9 +2,7 @@
 module.exports = {
   mutate: [
     'src/app/**/*.ts',
-    '!src/**/*.spec.ts',
-    '!src/test.ts',
-    '!src/environments/*.ts'
+    '!src/**/*.spec.ts'
   ],
   testRunner: 'jest',
   jest: {
@@ -14,4 +12,5 @@ module.exports = {
   reporters: ['html', 'clear-text', 'progress'],
   coverageAnalysis: 'off', // safer default for Angular + Jest
   tsconfigFile: 'tsconfig.json',
+  cleanTempDir: true
 };
