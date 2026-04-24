@@ -99,4 +99,24 @@ describe('ThemeService', () => {
     service.setThemeMode('dark' as ThemeMode);
     expect(localStorageMock.setItem).toHaveBeenCalled();
   });
+
+  it('should use "theme" as storage key', () => {
+    service.setThemeColor('red' as ThemeColor);
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('theme', expect.any(String));
+  });
+
+  it('should apply theme classes to document element', () => {
+    service.setThemeMode('dark' as ThemeMode);
+    expect(document.documentElement.classList).toContain('dark');
+    service.setThemeMode('light' as ThemeMode);
+    expect(document.documentElement.classList).toContain('light');
+  });
+
+  it('should store theme as JSON string in localStorage', () => {
+    service.setThemeColor('green' as ThemeColor);
+    const callArgs = (localStorageMock.setItem as jest.Mock).mock.calls[0];
+    const stored = JSON.parse(callArgs[1] as string);
+    expect(stored.color).toBe('green');
+    expect(stored.mode).toBe('light');
+  });
 });

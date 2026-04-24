@@ -404,4 +404,82 @@ describe('CarriersPage', () => {
   it('should expose carriers signal from service', () => {
     expect(component.carriers).toBe(carrierService.carriers);
   });
+
+  it('should open add dialog with correct panelClass and closeOnNavigation', () => {
+    const mockRef = createMockDialogRef<Carrier>();
+    (dialog.open as jest.Mock).mockReturnValue(mockRef.ref);
+
+    component.openAddDialog();
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        panelClass: 'carrier-dialog',
+        closeOnNavigation: false,
+      })
+    );
+  });
+
+  it('should open edit dialog with carrier data', () => {
+    const mockRef = createMockDialogRef<Carrier>();
+    (dialog.open as jest.Mock).mockReturnValue(mockRef.ref);
+
+    component.openEditDialog(mockCarrier);
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        data: { carrier: mockCarrier },
+        panelClass: 'carrier-dialog',
+        closeOnNavigation: false,
+      })
+    );
+  });
+
+  it('should show snackbar with error message via error effect', () => {
+    (carrierService.error as WritableSignal<string | null>).set('Test error');
+    fixture.detectChanges();
+    expect(snackBar.open).toHaveBeenCalledWith('Test error', 'Close', { duration: 4000 });
+  });
+
+  it('should call markForCheck when carriers signal changes', () => {
+    const markForCheckSpy = jest.spyOn(component['changeDetectorRef'], 'markForCheck');
+    carrierService.carriers.set([mockCarrier]);
+    fixture.detectChanges();
+    expect(markForCheckSpy).toHaveBeenCalled();
+  });
+
+  it('should have correct column labels', () => {
+    expect(component.columns[0].label).toBe('ID');
+    expect(component.columns[1].label).toBe('Name');
+    expect(component.columns[2].label).toBe('Tracking URL');
+    expect(component.columns[3].label).toBe('Active');
+    expect(component.columns[4].label).toBe('Created');
+    expect(component.columns[5].label).toBe('Updated');
+  });
+
+  it('should return true for isDateColumn with createdAt', () => {
+    expect(component.isDateColumn('createdAt')).toBe(true);
+  });
+
+  it('should return true for isDateColumn with updatedAt', () => {
+    expect(component.isDateColumn('updatedAt')).toBe(true);
+  });
+
+  it('should return false for isDateColumn with name', () => {
+    expect(component.isDateColumn('name')).toBe(false);
+  });
+
+  it('should return true for isBooleanColumn with isActive', () => {
+    expect(component.isBooleanColumn('isActive')).toBe(true);
+  });
+
+  it('should return false for isBooleanColumn with name', () => {
+    expect(component.isBooleanColumn('name')).toBe(false);
+  });
+
+  it('should not delete when selection is empty', () => {
+    component.deleteCarriers();
+    expect(dialog.open).not.toHaveBeenCalled();
+  });
 });

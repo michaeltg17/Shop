@@ -23,12 +23,47 @@ describe('PendingChangesService', () => {
   it('should set active dialog', () => {
     service.setActiveDialog(mockDialogRef as MatDialogRef<unknown>);
     expect(service.isPending()).toBe(false);
+    // Verify the dialog ref was actually stored by calling confirmNavigation which uses it
+    const result = service.confirmNavigation();
+    expect(result).toBe(true);
+    expect(mockDialogRef.close).toHaveBeenCalled();
   });
 
   it('should clear active dialog', () => {
     service.setActiveDialog(mockDialogRef as MatDialogRef<unknown>);
     service.clearActiveDialog();
     expect(service.isPending()).toBe(false);
+    // After clearing, confirmNavigation should NOT call close on the old ref
+    const result = service.confirmNavigation();
+    expect(result).toBe(true);
+    expect(mockDialogRef.close).not.toHaveBeenCalled();
+  });
+
+  it('should call dialog.close() in confirmNavigation when pending and user confirms', () => {
+    const confirmSpy = jest.spyOn(window, 'confirm').mockReturnValue(true);
+    service.setPending(true);
+    service.setActiveDialog(mockDialogRef as MatDialogRef<unknown>);
+    const result = service.confirmNavigation();
+    expect(result).toBe(true);
+    expect(mockDialogRef.close).toHaveBeenCalled();
+    confirmSpy.mockRestore();
+  });
+
+  it('should trigger beforeunload handler when pending', () => {
+    service.setPending(true);
+    const event = {
+      preventDefault: jest.fn(),
+      returnValue: undefined,
+    } as unknown as BeforeUnloadEvent;
+    // Access the private handler via the service's internal behavior
+    // We can verify it was registered by checking the event
+    const handler = (
+      service as unknown as { _beforeUnloadHandler: (e: BeforeUnloadEvent) => string }
+    )._beforeUnloadHandler;
+    const ret = handler(event);
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.returnValue).toBe('');
+    expect(ret).toBe('');
   });
 
   it('should set pending to true and add event listener', () => {

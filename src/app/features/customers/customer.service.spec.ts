@@ -191,4 +191,66 @@ describe('CustomerService', () => {
     // The customers array should remain unchanged
     expect(service.customers()).toEqual(initialCustomers);
   });
+
+  it('should convert string isActive "false" to boolean false', () => {
+    const customer: Customer = {
+      ...mockCustomer,
+      isActive: 'false' as unknown as boolean,
+    };
+    service.loadCustomers();
+    const req = httpMock.expectOne('api/customers');
+    req.flush([customer]);
+    expect(service.customers()[0].isActive).toBe(false);
+  });
+
+  it('should return empty array on load error', () => {
+    service.loadCustomers();
+    const req = httpMock.expectOne('api/customers');
+    req.flush('Error', { status: 500, statusText: 'Server Error' });
+    expect(service.customers()).toEqual([]);
+  });
+
+  it('should send body with ids when deleting customers', () => {
+    service.loadCustomers();
+    const loadReq = httpMock.expectOne('api/customers');
+    loadReq.flush([mockCustomer]);
+
+    service.deleteCustomers([1, 2]);
+    const deleteReq = httpMock.expectOne('api/customers');
+    expect(deleteReq.request.body).toEqual([1, 2]);
+    deleteReq.flush({});
+  });
+
+  it('should filter customers by ids when deleting', () => {
+    const customers: Customer[] = [
+      mockCustomer,
+      { ...mockCustomer, id: 2, firstName: 'Jane' },
+      { ...mockCustomer, id: 3, firstName: 'Bob' },
+    ];
+    service.loadCustomers();
+    const loadReq = httpMock.expectOne('api/customers');
+    loadReq.flush(customers);
+
+    service.deleteCustomers([1, 3]);
+    const deleteReq = httpMock.expectOne('api/customers');
+    deleteReq.flush({});
+
+    expect(service.customers()).toEqual([customers[1]]);
+  });
+
+  it('should spread current customers when updating', () => {
+    service.loadCustomers();
+    const loadReq = httpMock.expectOne('api/customers');
+    const initial = [mockCustomer];
+    loadReq.flush(initial);
+
+    const updated = { ...mockCustomer, firstName: 'Jane' };
+    service.updateCustomer(updated);
+    const updateReq = httpMock.expectOne(`api/customers/${mockCustomer.id}`);
+    updateReq.flush(updated);
+
+    // Verify the array reference changed (spread created new array)
+    expect(service.customers()).not.toBe(initial);
+    expect(service.customers()[0].firstName).toBe('Jane');
+  });
 });

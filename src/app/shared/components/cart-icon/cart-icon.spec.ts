@@ -55,4 +55,38 @@ describe('CartIcon', () => {
     component.loadCartCount();
     expect(component.cartItemCount).toBe(0);
   });
+
+  it('should add storage event listener on init', () => {
+    localStorage.clear();
+    const addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+    const comp = new CartIcon();
+    comp.ngOnInit();
+    expect(addEventListenerSpy).toHaveBeenCalledWith('storage', expect.any(Function));
+    addEventListenerSpy.mockRestore();
+  });
+
+  it('should remove storage event listener on destroy', () => {
+    localStorage.clear();
+    const removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    const comp = new CartIcon();
+    comp.ngOnInit();
+    comp.ngOnDestroy();
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('storage', expect.any(Function));
+    removeEventListenerSpy.mockRestore();
+  });
+
+  it('should handle empty array in localStorage', () => {
+    localStorage.clear();
+    localStorage.setItem('shoppingCart', JSON.stringify([]));
+    component.loadCartCount();
+    expect(component.cartItemCount).toBe(0);
+  });
+
+  it('should load cart count on init via ngOnInit', () => {
+    localStorage.clear();
+    localStorage.setItem('shoppingCart', JSON.stringify([{ quantity: 4 }]));
+    const comp = new CartIcon();
+    comp.ngOnInit();
+    expect(comp.cartItemCount).toBe(4);
+  });
 });

@@ -23,28 +23,52 @@ describe('ContactPage', () => {
     expect(component.contactForm.invalid).toBe(true);
   });
 
-  it('should have required validators for name', () => {
-    component.contactForm.get('name')?.setValue('a');
-    expect(component.contactForm.get('name')?.errors).toBeTruthy();
-    component.contactForm.get('name')?.setValue('John');
-    expect(component.contactForm.get('name')?.valid).toBe(true);
+  it('should have required and minLength validators for name', () => {
+    const nameCtrl = component.contactForm.get('name');
+    // required validator
+    nameCtrl?.setValue('');
+    expect(nameCtrl?.errors?.['required']).toBe(true);
+    // minLength validator
+    nameCtrl?.setValue('a');
+    expect(nameCtrl?.errors?.['minlength']).toBeTruthy();
+    nameCtrl?.setValue('John');
+    expect(nameCtrl?.valid).toBe(true);
   });
 
   it('should have required and email validators for email', () => {
-    component.contactForm.get('email')?.setValue('not-an-email');
-    expect(component.contactForm.get('email')?.errors).toBeTruthy();
-    component.contactForm.get('email')?.setValue('test@example.com');
-    expect(component.contactForm.get('email')?.valid).toBe(true);
+    const emailCtrl = component.contactForm.get('email');
+    // required validator
+    emailCtrl?.setValue('');
+    expect(emailCtrl?.errors?.['required']).toBe(true);
+    // email validator
+    emailCtrl?.setValue('not-an-email');
+    expect(emailCtrl?.errors?.['email']).toBeTruthy();
+    emailCtrl?.setValue('test@example.com');
+    expect(emailCtrl?.valid).toBe(true);
   });
 
   it('should have required and minLength validators for subject', () => {
-    component.contactForm.get('subject')?.setValue('abcde');
-    expect(component.contactForm.get('subject')?.valid).toBe(true);
+    const subjectCtrl = component.contactForm.get('subject');
+    // required validator
+    subjectCtrl?.setValue('');
+    expect(subjectCtrl?.errors?.['required']).toBe(true);
+    // minLength validator
+    subjectCtrl?.setValue('abc');
+    expect(subjectCtrl?.errors?.['minlength']).toBeTruthy();
+    subjectCtrl?.setValue('Hello');
+    expect(subjectCtrl?.valid).toBe(true);
   });
 
   it('should have required and minLength validators for message', () => {
-    component.contactForm.get('message')?.setValue('abcdefghij');
-    expect(component.contactForm.get('message')?.valid).toBe(true);
+    const msgCtrl = component.contactForm.get('message');
+    // required validator
+    msgCtrl?.setValue('');
+    expect(msgCtrl?.errors?.['required']).toBe(true);
+    // minLength validator
+    msgCtrl?.setValue('short');
+    expect(msgCtrl?.errors?.['minlength']).toBeTruthy();
+    msgCtrl?.setValue('abcdefghij');
+    expect(msgCtrl?.valid).toBe(true);
   });
 
   it('should provide accessors for form controls', () => {
@@ -63,7 +87,9 @@ describe('ContactPage', () => {
     component.contactForm.get('subject')?.setValue('Hello');
     component.contactForm.get('message')?.setValue('Test message here');
     component.onSubmit();
-    expect(alertSpy).toHaveBeenCalled();
+    expect(alertSpy).toHaveBeenCalledWith(
+      'Thank you for your message! We will get back to you soon.'
+    );
     expect(component.contactForm.pristine).toBe(true);
   });
 });
