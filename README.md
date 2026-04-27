@@ -22,4 +22,4 @@
 ### Infra
 
 - Docker
-- Github Actions
+- GitHub Actions
