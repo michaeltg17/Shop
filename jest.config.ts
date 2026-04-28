@@ -6,6 +6,7 @@ import { createCjsPreset } from 'jest-preset-angular/presets/index.js';
 export default {
     ...createCjsPreset(),
     testPathIgnorePatterns: ['<rootDir>/playwright/', '<rootDir>/.stryker-tmp'],
+    coverageReporters: ['json-summary', 'lcov', 'text', 'clover'],
     coverageThreshold: {
         global: {
             branches: 87,
