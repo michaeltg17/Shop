@@ -20,10 +20,15 @@
 - `angular-eslint`
 - EditorConfig
 
-### Infra
+### CI
 
-- Docker
+- CI in Docker
 - GitHub Actions
+
+### CD
+
+- GitLab self hosted
+- Docker
 
 ### Dev stack
 - Local AI unsloth/Qwen3.6-27B-Q4_K_M.gguf - 262K Context - RTX 3090
