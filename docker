@@ -1,0 +1,14 @@
+services:
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    image: angular-ci:latest
+    environment:
+      - STRYKER_DASHBOARD_API_KEY=${STRYKER_DASHBOARD_API_KEY}
+      - DISPLAY=:99
+      - NODE_ENV=ci
+    volumes:
+      - ./coverage:/app/coverage
+      - ./reports:/app/reports
+    command: ["/bin/bash", "/app/run-ci.sh"]

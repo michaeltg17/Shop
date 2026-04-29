@@ -7,57 +7,49 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  ci:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      - name: Setup Node.js 24
-        uses: actions/setup-node@v5
-        with:
-          node-version: 24
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run prettier check
-        run: npm run prettier:check
-
-      - name: Run linting
-        run: npm run lint
-
-      - name: Run unit tests
-        run: npm run test:coverage
-
-      - name: Generating coverage badges
-        uses: jpb06/jest-badges-action@v1.9.18
-        with:
-          branches: main
-
-      - name: Build
-        run: npm run build
-
-      - name: Install Playwright browsers
-        run: npm run playwright:install
-
-      - name: Run Playwright tests
-        run: npm run playwright
-
-      - name: Run Stryker mutation testing
-        run: npm run stryker
-        env:
-          STRYKER_DASHBOARD_API_KEY: ${{ secrets.STRYKER_DASHBOARD_API_KEY }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build CI Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          load: true
+          tags: angular-ci:latest
+          cache-from: type=gha,scope=ci
+          cache-to: type=gha,mode=max,scope=ci
+          file: Dockerfile.ci
+
+      - name: Run CI pipeline in Docker
+        run: docker compose -f docker-compose.ci.yml run --rm ci
+
+      - name: Generate coverage badges
+        uses: jpb06/jest-badges-action@v1.9.18
+        with:
+          branches: main
+
+      - name: Validate production Docker image builds
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha,scope=production
+          cache-to: type=gha,mode=max,scope=production
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            coverage/
+            reports/
+          retention-days: 30

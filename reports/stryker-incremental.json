@@ -35222,7 +35222,7 @@
       "source": "import { TitleService } from './title.service';\n\ndescribe('TitleService', () => {\n  let service: TitleService;\n\n  beforeEach(() => {\n    service = new TitleService();\n  });\n\n  it('should be created', () => {\n    expect(service).toBeTruthy();\n  });\n\n  it('should return title function', () => {\n    expect(service.getTitle).toBeDefined();\n    expect(typeof service.getTitle).toBe('function');\n  });\n\n  it('should return \"Angular App\" as title', () => {\n    expect(service.getTitle()).toBe('Angular App');\n  });\n});\n"
     }
   },
-  "projectRoot": "E:\\1\\Repos\\Angular",
+  "projectRoot": "/app",
   "config": {
     "mutate": [
       "src/app/**/*.ts",
@@ -35250,11 +35250,8 @@
       "low": 60
     },
     "dashboard": {
-      "project": "github.com/michaeltg17/Angular",
-      "module": "angular-app",
-      "version": "local",
-      "baseUrl": "https://dashboard.stryker-mutator.io",
-      "reportType": "full"
+      "reportType": "full",
+      "baseUrl": "https://dashboard.stryker-mutator.io/api/reports"
     },
     "allowConsoleColors": true,
     "checkers": [],

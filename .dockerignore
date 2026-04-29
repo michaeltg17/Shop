@@ -1,21 +1,25 @@
+# Dependencies (will be installed fresh in container)
 node_modules
+
+# Git
 .git
 .gitignore
+
+# Build output
+dist
+.angular
+coverage
+
+# IDE
 .vscode
-.github
-eslint.config.js
-jest.config.ts
-playwright.config.ts
-setup-jest.ts
-stryker.config.js
-.prettierignore
-.prettierrc
-.editorconfig
-README.md
-old_stryker/
-playwright/
-reports/
-coverage/
-. angular/
+
+# CI Docker files (not needed inside containers)
 Dockerfile
+Dockerfile.ci
+docker-compose.yml
+docker-compose.ci.yml
 .dockerignore
+.dockerignore.ci
+
+# Docs
+README.md
