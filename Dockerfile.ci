@@ -1,13 +1,7 @@
-# Use official Playwright image - includes Chromium + all system deps
-FROM mcr.microsoft.com/playwright:v1.50.0-jammy
+# Use official Playwright image - includes Chromium, Firefox, WebKit + all system deps + Node.js
+FROM mcr.microsoft.com/playwright:v1.58.1-jammy
 
 WORKDIR /app
-
-# Upgrade to Node 22 LTS for Angular 21 compatibility
-RUN apt-get update && apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
-    apt-get install -y nodejs && \
-    rm -rf /var/lib/apt/lists/*
 
 # Set browser cache path (browsers already present from official image)
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
