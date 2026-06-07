@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
-import customersJson from '../../public/customers.json';
-import productsJson from '../../public/products.json';
+import customersJson from './fixtures/customers.json';
+import productsJson from './fixtures/products.json';
 import { Customer } from '../app/features/customers/customer';
 import { Product } from '../app/features/products/product';
 import { setupWorker } from 'msw/browser';
