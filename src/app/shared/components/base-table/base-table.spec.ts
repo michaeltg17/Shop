@@ -1,8 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
 import { BaseTableComponent, ColumnDef } from './base-table';
 import { SelectionModel } from '@angular/cdk/collections';
-import { MatTableDataSource } from '@angular/material/table';
 
 interface TestRow {
   id: number;
@@ -64,7 +62,10 @@ describe('BaseTableComponent', () => {
   });
 
   it('should return false when not all rows are selected', () => {
-    const rows: TestRow[] = [{ id: 1, name: 'A' }, { id: 2, name: 'B' }];
+    const rows: TestRow[] = [
+      { id: 1, name: 'A' },
+      { id: 2, name: 'B' },
+    ];
     component.selection = new SelectionModel<TestRow>(true, []);
     component.dataSource.data = rows;
     component.selection.select(rows[0]);

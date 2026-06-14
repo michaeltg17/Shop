@@ -6,9 +6,8 @@ import {
   ChangeDetectorRef,
   effect,
   signal,
-  TemplateRef,
 } from '@angular/core';
-import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Customer } from '../../customer';
 import { CustomerService } from '../../customer.service';
@@ -29,12 +28,7 @@ import { BaseTableComponent, ColumnDef } from '../../../../shared/components/bas
 
 @Component({
   selector: 'app-customers-table',
-  imports: [
-    MatSnackBarModule,
-    CustomerCell,
-    MatDialogModule,
-    BaseTableComponent,
-  ],
+  imports: [MatSnackBarModule, CustomerCell, MatDialogModule, BaseTableComponent],
   templateUrl: './customers-table.html',
   styleUrls: ['./customers-table.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

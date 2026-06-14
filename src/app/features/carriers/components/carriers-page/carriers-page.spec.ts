@@ -8,7 +8,6 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { of, Subject } from 'rxjs';
 import { Carrier } from '../../carrier';
 import { ConfirmationDialog } from '../../../../shared/components/confirmation-dialog/confirmation-dialog';
-import { CarrierDialog } from '../carrier-dialog/carrier-dialog';
 import { DialogMode } from '../../../../core/models/dialogMode';
 
 describe('CarriersPage', () => {

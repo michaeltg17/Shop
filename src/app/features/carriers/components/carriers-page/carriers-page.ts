@@ -116,9 +116,7 @@ export class CarriersPage implements OnInit {
     dialogRef.afterClosed().subscribe((confirmed: boolean) => {
       if (!confirmed) return;
 
-      this.selection.selected.forEach(carrier =>
-        this.carrierService.deleteCarrier(carrier.id)
-      );
+      this.selection.selected.forEach(carrier => this.carrierService.deleteCarrier(carrier.id));
 
       this.selection.clear();
       this.changeDetectorRef.markForCheck();

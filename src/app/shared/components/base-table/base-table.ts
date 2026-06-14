@@ -6,12 +6,9 @@ import {
   ViewChild,
   AfterViewInit,
   ChangeDetectionStrategy,
+  TemplateRef,
 } from '@angular/core';
-import {
-  MatTable,
-  MatTableDataSource,
-  MatTableModule,
-} from '@angular/material/table';
+import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { SelectionModel } from '@angular/cdk/collections';
@@ -118,19 +115,21 @@ export interface ColumnDef {
 
         <!-- Dynamic Columns -->
         @for (col of columns(); track col.key) {
-        <ng-container [matColumnDef]="col.key">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            {{ col.label }}
-          </th>
-          <td mat-cell *matCellDef="let row">
-            <ng-container
-              *ngIf="cellTemplate; else defaultCell"
-              [ngTemplateOutlet]="cellTemplate"
-              [ngTemplateOutletContext]="{ $implicit: row, column: col }"
-            ></ng-container>
-            <ng-template #defaultCell>{{ row[col.key] }}</ng-template>
-          </td>
-        </ng-container>
+          <ng-container [matColumnDef]="col.key">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>
+              {{ col.label }}
+            </th>
+            <td mat-cell *matCellDef="let row">
+              @if (cellTemplate) {
+                <ng-container
+                  [ngTemplateOutlet]="cellTemplate"
+                  [ngTemplateOutletContext]="{ $implicit: row, column: col }"
+                ></ng-container>
+              } @else {
+                {{ row[col.key] }}
+              }
+            </td>
+          </ng-container>
         }
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
@@ -141,37 +140,36 @@ export interface ColumnDef {
         ></tr>
       </table>
 
-      <mat-paginator
-        [pageSizeOptions]="pageSizeOptions()"
-        showFirstLastButtons
-      ></mat-paginator>
+      <mat-paginator [pageSizeOptions]="pageSizeOptions()" showFirstLastButtons></mat-paginator>
     </div>
   `,
-  styles: [`
-    :host {
-      display: block;
-    }
+  styles: [
+    `
+      :host {
+        display: block;
+      }
 
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
+      .toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
 
-    .toolbar mat-form-field {
-      flex: 1;
-      min-width: 200px;
-    }
+      .toolbar mat-form-field {
+        flex: 1;
+        min-width: 200px;
+      }
 
-    .table-wrap {
-      overflow-x: auto;
-    }
+      .table-wrap {
+        overflow-x: auto;
+      }
 
-    .table {
-      width: 100%;
-    }
-  `],
+      .table {
+        width: 100%;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BaseTableComponent<T> implements AfterViewInit {
@@ -184,13 +182,13 @@ export class BaseTableComponent<T> implements AfterViewInit {
   @Input() addIcon: string | null = null;
   @Input() editIcon: string | null = null;
   @Input() deleteIcon: string | null = null;
-  @Input() addButtonLabel: string = 'Add';
-  @Input() editButtonLabel: string = 'Edit';
-  @Input() deleteButtonLabel: string = 'Delete';
+  @Input() addButtonLabel = 'Add';
+  @Input() editButtonLabel = 'Edit';
+  @Input() deleteButtonLabel = 'Delete';
   @Input() addButtonDisabled = false;
   @Input() editButtonDisabled = false;
   @Input() deleteButtonDisabled = false;
-  @Input() cellTemplate: any = null;
+  @Input() cellTemplate: TemplateRef<unknown> | null = null;
 
   // --- outputs ---
   @Output() add = new EventEmitter<void>();
@@ -225,8 +223,8 @@ export class BaseTableComponent<T> implements AfterViewInit {
     this.dataSource.paginator = this.paginator;
   }
 
-  onFilterChange(event: any): void {
-    const value = (event.target as any)?.value ?? '';
+  onFilterChange(event: Event): void {
+    const value = (event.target as HTMLInputElement)?.value ?? '';
     this.filterValue = value.trim().toLowerCase();
     this.dataSource.filter = this.filterValue;
     this.filterChange.emit(this.filterValue);
