@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { BaseTableComponent, ColumnDef } from './base-table';
 import { SelectionModel } from '@angular/cdk/collections';
+import { MatTableDataSource } from '@angular/material/table';
 
 interface TestRow {
   id: number;
@@ -23,7 +24,7 @@ describe('BaseTableComponent', () => {
 
     fixture = TestBed.createComponent(BaseTableComponent);
     component = fixture.componentInstance;
-    component.columns = () => mockColumns;
+    component.setInput('columns', mockColumns);
     fixture.detectChanges();
   });
 
@@ -39,31 +40,29 @@ describe('BaseTableComponent', () => {
 
   it('should apply filter with trim and lowercase', () => {
     component.onFilterChange({ target: { value: '  TEST  ' } } as unknown as Event);
-    expect(component.filterValue).toBe('test');
+    expect(component.dataSource().filter).toBe('test');
   });
 
   it('should handle filter with empty string', () => {
     component.onFilterChange({ target: { value: '' } } as unknown as Event);
-    expect(component.filterValue).toBe('');
-    expect(component.dataSource.filter).toBe('');
+    expect(component.dataSource().filter).toBe('');
   });
 
   it('should handle filter with whitespace only', () => {
     component.onFilterChange({ target: { value: '   ' } } as unknown as Event);
-    expect(component.filterValue).toBe('');
+    expect(component.dataSource().filter).toBe('');
   });
 
   it('should handle filter with null target', () => {
     const event = new Event('input');
-    // Simulate null target
     Object.defineProperty(event, 'target', { get: () => null });
     component.onFilterChange(event);
-    expect(component.filterValue).toBe('');
+    expect(component.dataSource().filter).toBe('');
   });
 
   it('should handle filter with undefined value', () => {
     component.onFilterChange({ target: { value: undefined } } as unknown as Event);
-    expect(component.filterValue).toBe('');
+    expect(component.dataSource().filter).toBe('');
   });
 
   it('should emit filterChange when filter changes', () => {
@@ -74,14 +73,16 @@ describe('BaseTableComponent', () => {
 
   it('should set dataSource.filter when applying filter', () => {
     component.onFilterChange({ target: { value: 'test' } } as unknown as Event);
-    expect(component.dataSource.filter).toBe('test');
+    expect(component.dataSource().filter).toBe('test');
   });
 
   it('should return true when all rows are selected', () => {
     const rows: TestRow[] = [{ id: 1, name: 'A' }];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
-    component.selection.select(rows[0]);
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
+    selection.select(rows[0]);
     expect(component.isAllSelected()).toBe(true);
   });
 
@@ -90,33 +91,41 @@ describe('BaseTableComponent', () => {
       { id: 1, name: 'A' },
       { id: 2, name: 'B' },
     ];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
-    component.selection.select(rows[0]);
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
+    selection.select(rows[0]);
     expect(component.isAllSelected()).toBe(false);
   });
 
   it('should return true for isAllSelected with empty data', () => {
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = [];
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>([]);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
     expect(component.isAllSelected()).toBe(true);
   });
 
   it('should toggle all rows - select all', () => {
     const rows: TestRow[] = [{ id: 1, name: 'A' }];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
     component.toggleAllRows();
-    expect(component.selection.selected.length).toBe(1);
+    expect(selection.selected.length).toBe(1);
   });
 
   it('should toggle all rows - deselect all', () => {
     const rows: TestRow[] = [{ id: 1, name: 'A' }];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
-    component.selection.select(rows[0]);
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
+    selection.select(rows[0]);
     component.toggleAllRows();
-    expect(component.selection.selected.length).toBe(0);
+    expect(selection.selected.length).toBe(0);
   });
 
   it('should toggle all rows - multiple rows', () => {
@@ -125,12 +134,14 @@ describe('BaseTableComponent', () => {
       { id: 2, name: 'B' },
       { id: 3, name: 'C' },
     ];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
     component.toggleAllRows();
-    expect(component.selection.selected.length).toBe(3);
+    expect(selection.selected.length).toBe(3);
     component.toggleAllRows();
-    expect(component.selection.selected.length).toBe(0);
+    expect(selection.selected.length).toBe(0);
   });
 
   it('should emit add when add event is triggered', () => {
@@ -141,16 +152,19 @@ describe('BaseTableComponent', () => {
 
   it('should emit edit only when exactly one row is selected', () => {
     const spy = jest.spyOn(component.edit, 'emit');
-    component.selection = new SelectionModel<TestRow>(true, []);
+    const rows: TestRow[] = [{ id: 1, name: 'A' }];
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
 
     // no selection
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
     component.onEdit();
     expect(spy).not.toHaveBeenCalled();
 
     // one selection
-    const rows: TestRow[] = [{ id: 1, name: 'A' }];
-    component.dataSource.data = rows;
-    component.selection.select(rows[0]);
+    selection.select(rows[0]);
+    fixture.detectChanges();
     component.onEdit();
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -161,25 +175,31 @@ describe('BaseTableComponent', () => {
       { id: 1, name: 'A' },
       { id: 2, name: 'B' },
     ];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
-    component.selection.select(rows[0], rows[1]);
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
+    selection.select(rows[0], rows[1]);
+    fixture.detectChanges();
     component.onEdit();
     expect(spy).not.toHaveBeenCalled();
   });
 
   it('should emit delete only when at least one row is selected', () => {
     const spy = jest.spyOn(component.delete, 'emit');
-    component.selection = new SelectionModel<TestRow>(true, []);
+    const rows: TestRow[] = [{ id: 1, name: 'A' }];
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
 
     // no selection
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
     component.onDelete();
     expect(spy).not.toHaveBeenCalled();
 
     // one selection
-    const rows: TestRow[] = [{ id: 1, name: 'A' }];
-    component.dataSource.data = rows;
-    component.selection.select(rows[0]);
+    selection.select(rows[0]);
+    fixture.detectChanges();
     component.onDelete();
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -190,9 +210,12 @@ describe('BaseTableComponent', () => {
       { id: 1, name: 'A' },
       { id: 2, name: 'B' },
     ];
-    component.selection = new SelectionModel<TestRow>(true, []);
-    component.dataSource.data = rows;
-    component.selection.select(rows[0], rows[1]);
+    const selection = new SelectionModel<TestRow>(true, []);
+    const dataSource = new MatTableDataSource<TestRow>(rows);
+    component.setInput('selection', selection);
+    component.setInput('dataSource', dataSource);
+    selection.select(rows[0], rows[1]);
+    fixture.detectChanges();
     component.onDelete();
     expect(spy).toHaveBeenCalledTimes(1);
   });
@@ -205,15 +228,15 @@ describe('BaseTableComponent', () => {
   });
 
   it('should have default button labels', () => {
-    expect(component.addButtonLabel).toBe('Add');
-    expect(component.editButtonLabel).toBe('Edit');
-    expect(component.deleteButtonLabel).toBe('Delete');
+    expect(component.addButtonLabel()).toBe('Add');
+    expect(component.editButtonLabel()).toBe('Edit');
+    expect(component.deleteButtonLabel()).toBe('Delete');
   });
 
   it('should have default disabled state as false', () => {
-    expect(component.addButtonDisabled).toBe(false);
-    expect(component.editButtonDisabled).toBe(false);
-    expect(component.deleteButtonDisabled).toBe(false);
+    expect(component.addButtonDisabled()).toBe(false);
+    expect(component.editButtonDisabled()).toBe(false);
+    expect(component.deleteButtonDisabled()).toBe(false);
   });
 
   it('should use default pageSizeOptions', () => {
@@ -221,9 +244,9 @@ describe('BaseTableComponent', () => {
   });
 
   it('should use default icons when not specified', () => {
-    expect(component.addIcon).toBeNull();
-    expect(component.editIcon).toBeNull();
-    expect(component.deleteIcon).toBeNull();
+    expect(component.addIcon()).toBeNull();
+    expect(component.editIcon()).toBeNull();
+    expect(component.deleteIcon()).toBeNull();
   });
 
   it('should display columns in correct order with select first', () => {
@@ -234,12 +257,14 @@ describe('BaseTableComponent', () => {
   });
 
   it('should update displayedColumns when columns change', () => {
-    component.columns = () => [{ key: 'x', label: 'X' }];
+    component.setInput('columns', [{ key: 'x', label: 'X' }]);
+    fixture.detectChanges();
     expect(component.displayedColumns()).toEqual(['select', 'x']);
   });
 
   it('should handle empty columns', () => {
-    component.columns = () => [];
+    component.setInput('columns', []);
+    fixture.detectChanges();
     expect(component.displayedColumns()).toEqual(['select']);
   });
 });
