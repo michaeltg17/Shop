@@ -18,7 +18,7 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
     lastName: 'Tester',
     email: `${firstName.toLowerCase()}@example.com`,
     phone: phoneNumber,
-    active: true
+    active: true,
   });
 
   // click Add button in dialog
@@ -31,7 +31,7 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
   await customersPage.waitForDialogClose();
 
   // Wait for URL to settle
-  await page.waitForURL(/\/customers$/);
+  await page.waitForURL(/\/admin\/customers$/);
 
   // Sort by ID descending to bring the newest customer to the first page
   await customersPage.sortByIdDescending();
@@ -68,7 +68,7 @@ test('Validations - Missing first name shows error and disables Add', async ({ p
     lastName: 'Tester',
     email: 'valid@example.com',
     phone: '123-456-7890',
-    active: true
+    active: true,
   });
 
   // expect an error for first name and Add disabled
@@ -87,7 +87,7 @@ test('Validations - Invalid email shows error and disables Add', async ({ page }
     lastName: 'Tester',
     email: 'not-an-email',
     phone: '123-456-7890',
-    active: true
+    active: true,
   });
 
   // expect an error for email and Add disabled
@@ -146,7 +146,7 @@ test('Canceling when changes - Click cancel', async ({ page }) => {
     lastName: 'Tester',
     email: 'changed@example.com',
     phone: '123-456-7890',
-    active: true
+    active: true,
   });
   await formPage.clickCancel();
   await customersPage.waitForDialogClose();
@@ -163,7 +163,7 @@ test('Canceling when changes - Click outside', async ({ page }) => {
     lastName: 'Tester',
     email: 'changed@example.com',
     phone: '123-456-7890',
-    active: true
+    active: true,
   });
 
   // click outside; since dialog.disableClose is set true when dirty, it should stay

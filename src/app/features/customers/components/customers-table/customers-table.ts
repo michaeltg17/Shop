@@ -90,7 +90,7 @@ export class CustomersTable implements OnInit {
         this.dialogOpen.set(false);
         this.pendingService.clear();
         this.pendingService.clearActiveDialog();
-        this.router.navigate(['/customers']);
+        this.router.navigate(['.'], { relativeTo: this.route });
         if (result) this.customerService.addCustomer(result);
       });
       return;
@@ -107,7 +107,7 @@ export class CustomersTable implements OnInit {
       this.dialogOpen.set(false);
       this.pendingService.clear();
       this.pendingService.clearActiveDialog();
-      this.router.navigate(['/customers']);
+      this.router.navigate(['.'], { relativeTo: this.route });
       if (isEdit && result) this.customerService.updateCustomer(result);
     });
   });
@@ -223,16 +223,16 @@ export class CustomersTable implements OnInit {
   }
 
   viewCustomer(customer: Customer) {
-    this.router.navigate(['/customers', customer.id]);
+    this.router.navigate([customer.id], { relativeTo: this.route });
   }
 
   addCustomer() {
-    this.router.navigate(['/customers/new']);
+    this.router.navigate(['new'], { relativeTo: this.route });
   }
 
   editCustomer() {
     if (this.selection.selected.length !== 1) return;
-    this.router.navigate(['/customers', this.selection.selected[0].id, 'edit']);
+    this.router.navigate([this.selection.selected[0].id, 'edit'], { relativeTo: this.route });
   }
 
   deleteCustomers() {
