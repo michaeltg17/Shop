@@ -450,9 +450,11 @@ describe('CustomersTable', () => {
     // The error effect runs on init and checks for error signal
     // Verify the error signal is properly wired
     expect(component.error).toBe(customerService.error);
-    // Setting error should update the signal
+    // Setting error should trigger snackBar.open via the error effect
     (customerService.error as unknown as WritableSignal<string | null>).set('Test error');
+    fixture.detectChanges();
     expect(component.error()).toBe('Test error');
+    expect(snackBar.open).toHaveBeenCalledWith('Test error', 'Close', { duration: 4000 });
   });
 
   it('should update dataSource.data when customers signal changes', () => {
