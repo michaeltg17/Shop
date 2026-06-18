@@ -1,12 +1,4 @@
-import {
-  Component,
-  OnInit,
-  inject,
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  effect,
-  signal,
-} from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef, effect, signal, untracked } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Customer } from '../../customer';
@@ -77,7 +69,7 @@ export class CustomersTable implements OnInit {
     const rs = this.routeState();
     const customers = this.customers();
 
-    if (this.dialogOpen()) return;
+    if (untracked(() => this.dialogOpen())) return;
 
     const { id, isNew, isEdit } = rs;
 
@@ -87,11 +79,12 @@ export class CustomersTable implements OnInit {
       this.dialogOpen.set(true);
       const ref = this.openAddDialog();
       ref.afterClosed().subscribe(result => {
-        this.dialogOpen.set(false);
         this.pendingService.clear();
         this.pendingService.clearActiveDialog();
-        this.router.navigate(['.'], { relativeTo: this.route });
-        if (result) this.customerService.addCustomer(result);
+        this.router.navigate(['../'], { relativeTo: this.route }).then(() => {
+          this.dialogOpen.set(false);
+          if (result) this.customerService.addCustomer(result);
+        });
       });
       return;
     }
@@ -104,11 +97,12 @@ export class CustomersTable implements OnInit {
     this.dialogOpen.set(true);
     const ref = isEdit ? this.openEditDialog(customer) : this.openViewDialog(customer);
     ref.afterClosed().subscribe(result => {
-      this.dialogOpen.set(false);
       this.pendingService.clear();
       this.pendingService.clearActiveDialog();
-      this.router.navigate(['.'], { relativeTo: this.route });
-      if (isEdit && result) this.customerService.updateCustomer(result);
+      this.router.navigate(['../'], { relativeTo: this.route }).then(() => {
+        this.dialogOpen.set(false);
+        if (isEdit && result) this.customerService.updateCustomer(result);
+      });
     });
   });
 
