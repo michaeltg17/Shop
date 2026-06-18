@@ -1,4 +1,13 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef, effect, signal, untracked } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  effect,
+  signal,
+  untracked,
+} from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Customer } from '../../customer';
