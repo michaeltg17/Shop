@@ -23,10 +23,10 @@ export class PendingChangesService {
 
   setPending(v: boolean) {
     this._pending = v;
+    // Always remove first to prevent duplicate handlers (idempotent)
+    window.removeEventListener('beforeunload', this._beforeUnloadHandler);
     if (v) {
       window.addEventListener('beforeunload', this._beforeUnloadHandler);
-    } else {
-      window.removeEventListener('beforeunload', this._beforeUnloadHandler);
     }
   }
 
@@ -44,12 +44,13 @@ export class PendingChangesService {
   confirmNavigation(): boolean {
     // If nothing pending, still close any registered dialog and allow navigation
     if (!this._pending) {
+      const dialogRef = this._activeDialog;
+      this._activeDialog = null;
       try {
-        this._activeDialog?.close();
+        dialogRef?.close();
       } catch {
         /* ignore */
       }
-      this._activeDialog = null;
       window.removeEventListener('beforeunload', this._beforeUnloadHandler);
       return true;
     }
@@ -57,12 +58,13 @@ export class PendingChangesService {
     const ok = window.confirm('You have unsaved changes. Leave without saving?');
     if (ok) {
       this._pending = false;
+      const dialogRef = this._activeDialog;
+      this._activeDialog = null;
       try {
-        this._activeDialog?.close();
+        dialogRef?.close();
       } catch {
         /* ignore */
       }
-      this._activeDialog = null;
       window.removeEventListener('beforeunload', this._beforeUnloadHandler);
     }
     return ok;

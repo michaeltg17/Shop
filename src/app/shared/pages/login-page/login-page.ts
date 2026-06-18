@@ -60,7 +60,7 @@ export class LoginPage implements OnInit {
       // Simple authentication check (in a real app, this would be an API call)
       if (this.credentials.username === 'admin' && this.credentials.password === 'password') {
         // Successful login - navigate to dashboard
-        this.router.navigate(['/customers']);
+        this.router.navigate(['/admin/customers']);
       } else {
         this.loginError = 'Invalid username or password';
       }

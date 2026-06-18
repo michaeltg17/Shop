@@ -135,20 +135,20 @@ describe('CustomersTable', () => {
   it('should open view dialog via router', () => {
     jest.spyOn(router, 'navigate');
     component.viewCustomer(mockCustomer);
-    expect(router.navigate).toHaveBeenCalledWith(['/customers', mockCustomer.id]);
+    expect(router.navigate).toHaveBeenCalledWith([mockCustomer.id], { relativeTo: route });
   });
 
   it('should navigate to add customer', () => {
     jest.spyOn(router, 'navigate');
     component.addCustomer();
-    expect(router.navigate).toHaveBeenCalledWith(['/customers/new']);
+    expect(router.navigate).toHaveBeenCalledWith(['new'], { relativeTo: route });
   });
 
   it('should edit selected customer', () => {
     jest.spyOn(router, 'navigate');
     component.selection.select(mockCustomer);
     component.editCustomer();
-    expect(router.navigate).toHaveBeenCalledWith(['/customers', mockCustomer.id, 'edit']);
+    expect(router.navigate).toHaveBeenCalledWith([mockCustomer.id, 'edit'], { relativeTo: route });
   });
 
   it('should not edit when no customer selected', () => {
@@ -441,17 +441,15 @@ describe('CustomersTable', () => {
     const openSpy = jest.fn().mockReturnValue(dialogRefMock);
     (component['dialog'] as MatDialog).open = openSpy;
 
-    // The addCustomer method navigates to /customers/new
+    // The addCustomer method navigates to 'new' relative to the current route
     component.addCustomer();
-    expect(router.navigate).toHaveBeenCalledWith(['/customers/new']);
+    expect(router.navigate).toHaveBeenCalledWith(['new'], { relativeTo: route });
   });
 
   it('should show snackbar on error via error effect', () => {
-    // The error effect runs on init and checks for error signal
-    // Verify the error signal is properly wired
     expect(component.error).toBe(customerService.error);
-    // Setting error should update the signal
     (customerService.error as unknown as WritableSignal<string | null>).set('Test error');
+    fixture.detectChanges();
     expect(component.error()).toBe('Test error');
   });
 

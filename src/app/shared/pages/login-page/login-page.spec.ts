@@ -55,11 +55,11 @@ describe('LoginPage', () => {
     expect(component.loginError).toBe('Invalid username or password');
   }));
 
-  it('should navigate to /customers on successful login', fakeAsync(() => {
+  it('should navigate to /admin/customers on successful login', fakeAsync(() => {
     component.credentials = { username: 'admin', password: 'password' };
     component.onLogin();
     tick(1500);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/customers']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/customers']);
   }));
 
   it('should set loginError when username correct but password wrong', fakeAsync(() => {

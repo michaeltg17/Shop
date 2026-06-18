@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
   effect,
   signal,
+  untracked,
 } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -77,7 +78,7 @@ export class CustomersTable implements OnInit {
     const rs = this.routeState();
     const customers = this.customers();
 
-    if (this.dialogOpen()) return;
+    if (untracked(() => this.dialogOpen())) return;
 
     const { id, isNew, isEdit } = rs;
 
@@ -87,11 +88,12 @@ export class CustomersTable implements OnInit {
       this.dialogOpen.set(true);
       const ref = this.openAddDialog();
       ref.afterClosed().subscribe(result => {
-        this.dialogOpen.set(false);
         this.pendingService.clear();
         this.pendingService.clearActiveDialog();
-        this.router.navigate(['/customers']);
-        if (result) this.customerService.addCustomer(result);
+        this.router.navigate(['../'], { relativeTo: this.route }).then(() => {
+          this.dialogOpen.set(false);
+          if (result) this.customerService.addCustomer(result);
+        });
       });
       return;
     }
@@ -104,11 +106,12 @@ export class CustomersTable implements OnInit {
     this.dialogOpen.set(true);
     const ref = isEdit ? this.openEditDialog(customer) : this.openViewDialog(customer);
     ref.afterClosed().subscribe(result => {
-      this.dialogOpen.set(false);
       this.pendingService.clear();
       this.pendingService.clearActiveDialog();
-      this.router.navigate(['/customers']);
-      if (isEdit && result) this.customerService.updateCustomer(result);
+      this.router.navigate(['../'], { relativeTo: this.route }).then(() => {
+        this.dialogOpen.set(false);
+        if (isEdit && result) this.customerService.updateCustomer(result);
+      });
     });
   });
 
@@ -223,16 +226,16 @@ export class CustomersTable implements OnInit {
   }
 
   viewCustomer(customer: Customer) {
-    this.router.navigate(['/customers', customer.id]);
+    this.router.navigate([customer.id], { relativeTo: this.route });
   }
 
   addCustomer() {
-    this.router.navigate(['/customers/new']);
+    this.router.navigate(['new'], { relativeTo: this.route });
   }
 
   editCustomer() {
     if (this.selection.selected.length !== 1) return;
-    this.router.navigate(['/customers', this.selection.selected[0].id, 'edit']);
+    this.router.navigate([this.selection.selected[0].id, 'edit'], { relativeTo: this.route });
   }
 
   deleteCustomers() {

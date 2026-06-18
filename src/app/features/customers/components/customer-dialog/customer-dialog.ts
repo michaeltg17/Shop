@@ -65,8 +65,7 @@ export class CustomerDialog implements OnInit, OnDestroy {
       this.isActive.disable();
       this.phoneNumber.disable();
     }
-    // dynamic disableClose: prevent closing when the user made changes
-    // initially allow close (unless in view mode where fields are disabled)
+    // Initially allow close; prevent when dirty
     this.dialogRef.disableClose = false;
 
     const markDisable = () => {
@@ -92,6 +91,7 @@ export class CustomerDialog implements OnInit, OnDestroy {
       return;
     }
 
+    this.pendingService.clear();
     this.dialogRef.close({
       id: this.data.customer?.id ?? 0,
       firstName: this.firstName.value,

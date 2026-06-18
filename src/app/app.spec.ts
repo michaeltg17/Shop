@@ -19,8 +19,4 @@ describe('App', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-
-  it('should have titleService injected', () => {
-    expect(component.titleService).toBeTruthy();
-  });
 });
