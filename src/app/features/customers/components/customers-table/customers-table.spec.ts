@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signal, WritableSignal } from '@angular/core';
+import { signal, WritableSignal, flushEffects } from '@angular/core';
 import { CustomersTable } from './customers-table';
 import { CustomerService } from '../../customer.service';
 import { CustomerDialog } from '../customer-dialog/customer-dialog';
@@ -447,12 +447,9 @@ describe('CustomersTable', () => {
   });
 
   it('should show snackbar on error via error effect', () => {
-    // The error effect runs on init and checks for error signal
-    // Verify the error signal is properly wired
     expect(component.error).toBe(customerService.error);
-    // Setting error should trigger snackBar.open via the error effect
     (customerService.error as unknown as WritableSignal<string | null>).set('Test error');
-    fixture.detectChanges();
+    flushEffects();
     expect(component.error()).toBe('Test error');
     expect(snackBar.open).toHaveBeenCalledWith('Test error', 'Close', { duration: 4000 });
   });
