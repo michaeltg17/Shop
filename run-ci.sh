@@ -41,14 +41,17 @@ echo "[6/7] Running Stryker mutation testing..."
 npm run stryker
 echo "✓ Stryker mutation testing passed"
 
-# Step 7: SonarCloud analysis (skip if token not set)
+# Step 7: SonarCloud analysis (skip if token not set or invalid)
 echo ""
 echo "[7/7] Running SonarCloud analysis..."
 if [ -n "$SONAR_TOKEN" ]; then
-  npx sonarqube-scanner \
+  if npx sonarqube-scanner \
     -Dsonar.host.url=https://sonarcloud.io \
-    -Dsonar.login="$SONAR_TOKEN" || echo "⚠ SonarCloud analysis failed (check SONAR_TOKEN), continuing..."
-  echo "✓ SonarCloud analysis complete"
+    -Dsonar.login="$SONAR_TOKEN"; then
+    echo "✓ SonarCloud analysis complete"
+  else
+    echo "⚠ SonarCloud analysis failed (check SONAR_TOKEN), continuing..."
+  fi
 else
   echo "⚠ SONAR_TOKEN not set, skipping SonarCloud analysis"
 fi
