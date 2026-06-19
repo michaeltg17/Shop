@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { ThemeSelector } from '../../components/theme-selector/theme-selector';
 import { TitleService } from '../../../core/services/title.service';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-admin-layout',
@@ -13,4 +14,5 @@ import { RouterModule } from '@angular/router';
 })
 export class AdminLayout {
   protected titleService = inject(TitleService);
+  protected authService = inject(AuthService);
 }
