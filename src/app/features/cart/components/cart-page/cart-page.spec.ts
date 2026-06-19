@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CartPage } from './cart-page';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { CartService } from '../../cart.service';
 import { CartItem } from '../../../cart-item';
 import { Product } from '../../../products/product';
@@ -45,6 +45,7 @@ describe('CartPage', () => {
       imports: [CartPage],
       providers: [
         { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: { snapshot: { data: {} }, paramMap: {} } },
         { provide: CartService, useValue: cartService },
       ],
     }).compileComponents();

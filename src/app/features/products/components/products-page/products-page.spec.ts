@@ -6,6 +6,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import { Product } from '../../product';
+import { ActivatedRoute, Router } from '@angular/router';
 
 describe('ProductsPage', () => {
   let component: ProductsPage;
@@ -13,6 +14,8 @@ describe('ProductsPage', () => {
   let productService: Partial<ProductService>;
   let cartService: Partial<CartService>;
   let snackBar: Partial<MatSnackBar>;
+
+  let snackBarOpenSpy: jest.SpyInstance;
 
   const mockProduct: Product = {
     id: 1,
@@ -36,6 +39,7 @@ describe('ProductsPage', () => {
     snackBar = {
       open: jest.fn(),
     };
+    snackBarOpenSpy = jest.spyOn(snackBar, 'open');
 
     await TestBed.configureTestingModule({
       imports: [ProductsPage],
@@ -43,6 +47,8 @@ describe('ProductsPage', () => {
         { provide: ProductService, useValue: productService },
         { provide: CartService, useValue: cartService },
         { provide: MatSnackBar, useValue: snackBar },
+        { provide: ActivatedRoute, useValue: { snapshot: { data: {} }, paramMap: {} } },
+        { provide: Router, useValue: { navigate: jest.fn().mockReturnValue(Promise.resolve(true)) } },
       ],
     }).compileComponents();
 
@@ -120,10 +126,8 @@ describe('ProductsPage', () => {
   });
 
   it('should show snackbar with product title when adding to cart', () => {
-    const snackBarSpy = TestBed.inject(MatSnackBar);
-    jest.spyOn(snackBarSpy, 'open');
     component.addToCart(mockProduct);
-    expect(snackBarSpy.open).toHaveBeenCalledWith(`Added ${mockProduct.title} to cart!`, 'Close', {
+    expect(snackBarOpenSpy).toHaveBeenCalledWith(`Added ${mockProduct.title} to cart!`, 'Close', {
       duration: 3000,
     });
   });
