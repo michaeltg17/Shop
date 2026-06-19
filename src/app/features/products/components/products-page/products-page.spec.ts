@@ -48,7 +48,10 @@ describe('ProductsPage', () => {
         { provide: CartService, useValue: cartService },
         { provide: MatSnackBar, useValue: snackBar },
         { provide: ActivatedRoute, useValue: { snapshot: { data: {} }, paramMap: {} } },
-        { provide: Router, useValue: { navigate: jest.fn().mockReturnValue(Promise.resolve(true)) } },
+        {
+          provide: Router,
+          useValue: { navigate: jest.fn().mockReturnValue(Promise.resolve(true)) },
+        },
       ],
     }).compileComponents();
 
