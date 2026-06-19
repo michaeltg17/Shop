@@ -18,25 +18,12 @@
   >
     Contact
   </button>
-  <button
-    *ngIf="!authService.isAuthenticated()"
-    mat-button
-    routerLink="/login"
-    routerLinkActive="active"
-  >
-    Login
-  </button>
-  <button
-    *ngIf="authService.isAuthenticated()"
-    mat-button
-    routerLink="/admin/customers"
-    routerLinkActive="active"
-  >
-    Admin
-  </button>
-  <button *ngIf="authService.isAuthenticated()" mat-button (click)="authService.logout()">
-    Logout
-  </button>
+  @if (!authService.isAuthenticated()) {
+    <button mat-button routerLink="/login" routerLinkActive="active">Login</button>
+  } @else {
+    <button mat-button routerLink="/admin/customers" routerLinkActive="active">Admin</button>
+    <button mat-button (click)="authService.logout()">Logout</button>
+  }
   <app-theme-selector></app-theme-selector>
 </mat-toolbar>
 <router-outlet></router-outlet>
