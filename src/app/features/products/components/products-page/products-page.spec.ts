@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { ComponentRef, inject, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ProductsPage } from './products-page';
 import { ProductService } from '../../product.service';
 import { CartService } from '../../../cart/cart.service';
@@ -25,7 +25,7 @@ describe('ProductsPage', () => {
     rating: { rate: 4.5, count: 10 },
   };
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(async () => {
     productService = {
       loadProducts: jest.fn().mockReturnValue(of([mockProduct])),
     };
@@ -36,7 +36,7 @@ describe('ProductsPage', () => {
 
     snackBarOpenSpy = jest.fn();
 
-    TestBed.configureTestingModule({
+    await TestBed.configureTestingModule({
       imports: [ProductsPage],
       providers: [
         { provide: ProductService, useValue: productService },
@@ -48,19 +48,10 @@ describe('ProductsPage', () => {
           useValue: { navigate: jest.fn().mockReturnValue(Promise.resolve(true)) },
         },
       ],
-    })
-      .compileComponents()
-      .then(() => {
-        fixture = TestBed.createComponent(ProductsPage);
-        component = fixture.componentInstance;
+    }).compileComponents();
 
-        // Get the injected MatSnackBar and spy on it directly
-        const matSnackBar = TestBed.inject(MatSnackBar);
-        snackBarOpenSpy = jest.spyOn(matSnackBar, 'open').mockClear();
-      });
-  }));
-
-  beforeEach(() => {
+    fixture = TestBed.createComponent(ProductsPage);
+    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
@@ -134,7 +125,7 @@ describe('ProductsPage', () => {
 
   it('should show snackbar with product title when adding to cart', () => {
     component.addToCart(mockProduct);
-    expect(snackBarOpenSpy).toHaveBeenCalledWith(`Added ${mockProduct.title} to cart!`, 'Close', {
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Added Test Product to cart!', 'Close', {
       duration: 3000,
     });
   });
