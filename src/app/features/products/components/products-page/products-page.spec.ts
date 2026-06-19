@@ -15,7 +15,7 @@ describe('ProductsPage', () => {
   let cartService: Partial<CartService>;
   let snackBar: Partial<MatSnackBar>;
 
-  let snackBarOpenSpy: jest.SpyInstance;
+  let snackBarOpenSpy: jest.Mock;
 
   const mockProduct: Product = {
     id: 1,
@@ -36,10 +36,10 @@ describe('ProductsPage', () => {
       addToCart: jest.fn(),
     };
 
+    snackBarOpenSpy = jest.fn();
     snackBar = {
-      open: jest.fn(),
+      open: snackBarOpenSpy,
     };
-    snackBarOpenSpy = jest.spyOn(snackBar, 'open');
 
     await TestBed.configureTestingModule({
       imports: [ProductsPage],
