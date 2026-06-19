@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { ProductsPage } from './products-page';
 import { ProductService } from '../../product.service';
 import { CartService } from '../../../cart/cart.service';
@@ -13,8 +13,6 @@ describe('ProductsPage', () => {
   let fixture: ComponentFixture<ProductsPage>;
   let productService: Partial<ProductService>;
   let cartService: Partial<CartService>;
-  let snackBar: Partial<MatSnackBar>;
-
   let snackBarOpenSpy: jest.Mock;
 
   const mockProduct: Product = {
@@ -27,7 +25,7 @@ describe('ProductsPage', () => {
     rating: { rate: 4.5, count: 10 },
   };
 
-  beforeEach(async () => {
+  beforeEach(waitForAsync(() => {
     productService = {
       loadProducts: jest.fn().mockReturnValue(of([mockProduct])),
     };
@@ -37,26 +35,32 @@ describe('ProductsPage', () => {
     };
 
     snackBarOpenSpy = jest.fn();
-    snackBar = {
-      open: snackBarOpenSpy,
-    };
 
-    await TestBed.configureTestingModule({
+    TestBed.configureTestingModule({
       imports: [ProductsPage],
       providers: [
         { provide: ProductService, useValue: productService },
         { provide: CartService, useValue: cartService },
-        { provide: MatSnackBar, useValue: snackBar },
+        { provide: MatSnackBar, useValue: { open: snackBarOpenSpy } },
         { provide: ActivatedRoute, useValue: { snapshot: { data: {} }, paramMap: {} } },
         {
           provide: Router,
           useValue: { navigate: jest.fn().mockReturnValue(Promise.resolve(true)) },
         },
       ],
-    }).compileComponents();
+    })
+      .compileComponents()
+      .then(() => {
+        fixture = TestBed.createComponent(ProductsPage);
+        component = fixture.componentInstance;
 
-    fixture = TestBed.createComponent(ProductsPage);
-    component = fixture.componentInstance;
+        // Get the injected MatSnackBar and spy on it directly
+        const matSnackBar = TestBed.inject(MatSnackBar);
+        snackBarOpenSpy = jest.spyOn(matSnackBar, 'open').mockClear();
+      });
+  }));
+
+  beforeEach(() => {
     fixture.detectChanges();
   });
 
