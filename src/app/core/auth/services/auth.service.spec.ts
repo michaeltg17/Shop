@@ -42,14 +42,14 @@ describe('AuthService', () => {
   });
 
   it('should clear auth state on logout', () => {
-    service.login('admin', 'password').subscribe({ next: () => {} });
+    service.login('admin', 'password').subscribe(() => undefined);
     service.logout();
     expect(service.isAuthenticated()).toBe(false);
     expect(service.user()).toBeNull();
   });
 
   it('should persist auth across storage reads', () => {
-    service.login('admin', 'password').subscribe({ next: () => {} });
+    service.login('admin', 'password').subscribe(() => undefined);
     expect(localStorage.getItem('angular_auth_user')).toBeTruthy();
   });
 });
