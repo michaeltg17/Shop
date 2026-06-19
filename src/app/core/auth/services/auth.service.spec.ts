@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthService } from './auth.service';
+import { AuthService, User } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -51,5 +51,34 @@ describe('AuthService', () => {
   it('should persist auth across storage reads', () => {
     service.login('admin', 'password').subscribe(() => undefined);
     expect(localStorage.getItem('angular_auth_user')).toBeTruthy();
+  });
+
+  it('should return Observable<User | null> from authState', () => {
+    service.login('admin', 'password').subscribe(() => undefined);
+    let emitted: User | null = null;
+    service.authState.subscribe(user => {
+      emitted = user;
+    });
+    expect(emitted?.username).toBe('admin');
+  });
+
+  it('should handle localStorage errors gracefully in hasStoredUser', () => {
+    const originalGetItem = localStorage.getItem;
+    localStorage.getItem = jest.fn(() => {
+      throw new Error('QuotaExceededError');
+    });
+    const service2 = TestBed.inject(AuthService);
+    expect(service2.isAuthenticated()).toBe(false);
+    localStorage.getItem = originalGetItem;
+  });
+
+  it('should handle localStorage errors gracefully in getStoredUser', () => {
+    const originalGetItem = localStorage.getItem;
+    localStorage.getItem = jest.fn(() => {
+      throw new Error('QuotaExceededError');
+    });
+    const service2 = TestBed.inject(AuthService);
+    expect(service2.user()).toBeNull();
+    localStorage.getItem = originalGetItem;
   });
 });
