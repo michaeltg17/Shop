@@ -90,8 +90,8 @@ test('Validations - Invalid email shows error and disables Add', async ({ page }
     active: true,
   });
 
-  // expect an error for email and Add disabled
-  await expect(formPage.dialog.locator('mat-error')).toBeVisible();
+  // expect an email-specific error and Add disabled
+  await expect(formPage.dialog.locator('mat-error:has-text("Invalid email")')).toBeVisible();
   await expect(formPage.addButton).toBeDisabled();
 });
 
