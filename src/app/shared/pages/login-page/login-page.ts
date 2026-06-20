@@ -1,13 +1,17 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../../../core/auth/services/auth.service';
+import { TitleService } from '../../../core/services/title.service';
+import { ThemeSelector } from '../../components/theme-selector/theme-selector';
+import { CartIcon } from '../../components/cart-icon/cart-icon';
 
 export type AuthMode = 'login' | 'register';
 
@@ -22,6 +26,10 @@ export type AuthMode = 'login' | 'register';
     MatIconModule,
     MatProgressSpinnerModule,
     MatTabsModule,
+    MatToolbarModule,
+    RouterModule,
+    ThemeSelector,
+    CartIcon,
   ],
   templateUrl: './login-page.html',
   styleUrls: ['./login-page.scss'],
@@ -39,8 +47,9 @@ export class LoginPage implements OnInit {
   message: string | null = null;
   messageError = false;
 
-  private router = inject(Router);
-  private authService = inject(AuthService);
+  protected router = inject(Router);
+  protected authService = inject(AuthService);
+  protected titleService = inject(TitleService);
 
   ngOnInit() {
     // If already authenticated, redirect based on role

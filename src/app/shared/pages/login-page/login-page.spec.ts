@@ -1,36 +1,51 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { LoginPage } from './login-page';
-import { Router } from '@angular/router';
+import { provideRouter, Router, RouterModule } from '@angular/router';
 import { AuthService, User } from '../../../core/auth/services/auth.service';
+import { TitleService } from '../../../core/services/title.service';
+import { ThemeService } from '../../../core/services/theme.service';
 import { of } from 'rxjs';
 
 describe('LoginPage', () => {
   let component: LoginPage;
   let fixture: ComponentFixture<LoginPage>;
-  let routerSpy: { navigate: jest.Mock };
+  let router: Router;
   let authServiceSpy: jest.Mocked<Partial<AuthService>>;
+  let titleServiceSpy: jest.Mocked<Partial<TitleService>>;
 
   beforeEach(async () => {
-    routerSpy = {
-      navigate: jest.fn().mockResolvedValue(true),
-    };
     authServiceSpy = {
       isAuthenticated: jest.fn().mockReturnValue(false),
       user: jest.fn().mockReturnValue(null),
       login: jest.fn().mockReturnValue(of(false)),
       register: jest.fn().mockReturnValue(of(false)),
     };
+    titleServiceSpy = {
+      getTitle: jest.fn().mockReturnValue('Shop'),
+    };
+    const themeServiceSpy = {
+      loadTheme: jest.fn(),
+      currentTheme: { mode: 'light', color: 'blue' },
+    } as jest.Mocked<Partial<ThemeService>>;
 
     await TestBed.configureTestingModule({
-      imports: [LoginPage],
+      imports: [LoginPage, RouterModule],
       providers: [
-        { provide: Router, useValue: routerSpy },
+        provideRouter([
+          { path: 'admin/customers', redirectTo: '' },
+          { path: 'shop/products', redirectTo: '' },
+          { path: '', component: LoginPage },
+        ]),
         { provide: AuthService, useValue: authServiceSpy },
+        { provide: TitleService, useValue: titleServiceSpy },
+        { provide: ThemeService, useValue: themeServiceSpy },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(LoginPage);
     component = fixture.componentInstance;
+    router = TestBed.inject(Router);
+    jest.spyOn(router, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
   });
 
@@ -56,19 +71,19 @@ describe('LoginPage', () => {
   it('should redirect admin to /admin/customers when already authenticated', () => {
     authServiceSpy.user!.mockReturnValue({ username: 'admin', isAdmin: true } as User);
     component.ngOnInit();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/customers']);
+    expect(router.navigate).toHaveBeenCalledWith(['/admin/customers']);
   });
 
   it('should redirect customer to /shop/products when already authenticated', () => {
     authServiceSpy.user!.mockReturnValue({ username: 'customer1', isAdmin: false } as User);
     component.ngOnInit();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
   });
 
   it('should not redirect when not authenticated', () => {
     authServiceSpy.user!.mockReturnValue(null);
     component.ngOnInit();
-    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(router.navigate).not.toHaveBeenCalled();
   });
 
   // Login tests
@@ -95,7 +110,7 @@ describe('LoginPage', () => {
     authServiceSpy.user!.mockReturnValue({ username: 'admin', isAdmin: true } as User);
     component.onLogin();
     tick(1500);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/admin/customers']);
+    expect(router.navigate).toHaveBeenCalledWith(['/admin/customers']);
   }));
 
   it('should navigate to /shop/products on successful customer login', fakeAsync(() => {
@@ -104,7 +119,7 @@ describe('LoginPage', () => {
     authServiceSpy.user!.mockReturnValue({ username: 'customer1', isAdmin: false } as User);
     component.onLogin();
     tick(1500);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
   }));
 
   it('should set message when only username is provided', fakeAsync(() => {
@@ -163,7 +178,7 @@ describe('LoginPage', () => {
     expect(component.message).toBe('Registration successful! Redirecting to shop...');
     expect(component.messageError).toBe(false);
     tick(1000); // Wait for redirect timeout
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
   }));
 
   it('should clear message before register attempt', fakeAsync(() => {
@@ -213,5 +228,14 @@ describe('LoginPage', () => {
     expect(component.authMode).toBe('register');
     expect(component.message).toBeNull();
     expect(component.credentials.username).toBe('');
+  });
+
+  // Navbar tests
+  it('should have titleService for navbar', () => {
+    expect(component.titleService).toBeTruthy();
+  });
+
+  it('should have authService for navbar auth state', () => {
+    expect(component.authService).toBeTruthy();
   });
 });
