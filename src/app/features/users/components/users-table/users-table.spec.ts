@@ -538,9 +538,10 @@ describe('UsersTable', () => {
 
   it('should have correct initial routeState values', () => {
     const routeState = (component as unknown as { routeState: () => unknown }).routeState();
-    expect((routeState as any).id).toBeNull();
-    expect((routeState as any).isNew).toBe(false);
-    expect((routeState as any).isEdit).toBe(false);
+    const rs = routeState as { id: string | null; isNew: boolean; isEdit: boolean };
+    expect(rs.id).toBeNull();
+    expect(rs.isNew).toBe(false);
+    expect(rs.isEdit).toBe(false);
   });
 
   it('should initialize with empty selection', () => {
