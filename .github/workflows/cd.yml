@@ -1,5 +1,15 @@
 name: cd
 
+# Staged deployment pipeline:
+#   dev  → automatic (no approval gate)
+#   qa   → requires manual approval (environment gate)
+#   prod → requires michaeltg17 approval (environment gate)
+#
+# GitHub Settings configuration required:
+#   - Environments > qa:    enable "Required reviewers" → add michaeltg17
+#   - Environments > prod:  enable "Required reviewers" → add michaeltg17
+#   - Optional: set wait_timer (minutes) per environment for auto-approval timeout
+
 on:
   workflow_run:
     workflows: ["ci"]
@@ -25,13 +35,15 @@ jobs:
             https://deploy.statikk.ddns.net || echo "⚠ Deploy endpoint unreachable, skipping"
           exit 0
 
-  # ── QA: requires manual approval ─────────────────────────────
+  # ── QA: requires manual approval via environment gate ─────────
+  # GitHub Settings → Environments → qa → Required reviewers: michaeltg17
   deploy-qa:
     needs: deploy-dev
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: qa
       url: https://qa.statikk.ddns.net
+      wait_timer: 5
     runs-on: ubuntu-latest
     steps:
       - name: Trigger qa deployment
@@ -46,13 +58,15 @@ jobs:
             https://deploy.statikk.ddns.net || echo "⚠ Deploy endpoint unreachable, skipping"
           exit 0
 
-  # ── PROD: requires manual approval ───────────────────────────
+  # ── PROD: requires michaeltg17 approval via environment gate ──
+  # GitHub Settings → Environments → prod → Required reviewers: michaeltg17
   deploy-prod:
     needs: deploy-qa
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: prod
       url: https://app.statikk.ddns.net
+      wait_timer: 5
     runs-on: ubuntu-latest
     steps:
       - name: Trigger prod deployment
