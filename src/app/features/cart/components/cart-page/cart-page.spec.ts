@@ -23,16 +23,6 @@ describe('CartPage', () => {
     rating: { rate: 4.5, count: 100 },
   };
 
-  const mockProduct2: Product = {
-    id: 2,
-    title: 'Another Product',
-    description: 'Another Description',
-    price: 50,
-    category: 'Test Category',
-    image: 'https://example.com/image2.jpg',
-    rating: { rate: 4, count: 50 },
-  };
-
   const mockSnackBar = { open: jest.fn() };
 
   beforeEach(async () => {
