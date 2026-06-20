@@ -3,7 +3,6 @@ import { CustomersTable } from './features/customers/components/customers-table/
 import { UserPage } from './shared/pages/user-page/user-page';
 import { ProductsPage } from './features/products/components/products-page/products-page';
 import { ContactPage } from './shared/pages/contact-page/contact-page';
-import { CarriersPage } from './features/carriers/components/carriers-page/carriers-page';
 import { CartPage } from './features/cart/components/cart-page/cart-page';
 import { PendingChangesGuard } from './core/auth/guards/pending-changes.guard';
 import { LoginPage } from './shared/pages/login-page/login-page';
@@ -45,7 +44,6 @@ export const routes: Routes = [
         runGuardsAndResolvers: 'always',
       },
       { path: 'products', component: ProductsPage },
-      { path: 'carriers', component: CarriersPage },
       { path: 'user', component: UserPage },
     ],
   },
