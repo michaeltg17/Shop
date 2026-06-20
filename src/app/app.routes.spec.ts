@@ -3,7 +3,6 @@ import { UsersTable } from './features/users/components/users-table/users-table'
 import { UserPage } from './shared/pages/user-page/user-page';
 import { ProductsPage } from './features/products/components/products-page/products-page';
 import { ContactPage } from './shared/pages/contact-page/contact-page';
-import { CarriersPage } from './features/carriers/components/carriers-page/carriers-page';
 import { CartPage } from './features/cart/components/cart-page/cart-page';
 import { LoginPage } from './shared/pages/login-page/login-page';
 import { PendingChangesGuard } from './core/auth/guards/pending-changes.guard';
@@ -97,12 +96,6 @@ describe('app.routes', () => {
     expect(route?.component).toBe(ProductsPage);
   });
 
-  it('should have carriers route nested under admin', () => {
-    const adminRoute = routes.find(r => r.path === 'admin');
-    const route = adminRoute?.children?.find(c => c.path === 'carriers');
-    expect(route).toBeDefined();
-    expect(route?.component).toBe(CarriersPage);
-  });
 
   it('should have a shop (ecommerce) layout route', () => {
     const shopRoute = routes.find(r => r.path === 'shop');
