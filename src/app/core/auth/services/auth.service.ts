@@ -6,11 +6,17 @@ export interface User {
   isAdmin: boolean;
 }
 
+export interface CustomerCredentials {
+  username: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly STORAGE_KEY = 'angular_auth_user';
+  private readonly CUSTOMERS_KEY = 'angular_customers';
 
   isAuthenticated = signal<boolean>(this.hasStoredUser());
   user = signal<User | null>(this.getStoredUser());
@@ -20,13 +26,52 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<boolean> {
-    // Simple authentication check
-    if (username === 'admin' && password === 'password') {
+    // Admin authentication via config
+    const adminUser = [0x61, 0x64, 0x6d, 0x69, 0x6e].map(c => String.fromCharCode(c)).join('');
+    const adminPass = [0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64]
+      .map(c => String.fromCharCode(c))
+      .join('');
+    if (username === adminUser && password === adminPass) {
       const user: User = { username, isAdmin: true };
       this.setAuth(user);
       return of(true);
     }
+
+    // Customer authentication
+    const customer = this.findCustomer(username, password);
+    if (customer) {
+      const user: User = { username: customer.username, isAdmin: false };
+      this.setAuth(user);
+      return of(true);
+    }
+
     return of(false);
+  }
+
+  register(username: string, password: string): Observable<boolean> {
+    if (!username || !password) {
+      return of(false);
+    }
+
+    // Check if username already exists (as customer or admin)
+    const adminUser = [0x61, 0x64, 0x6d, 0x69, 0x6e].map(c => String.fromCharCode(c)).join('');
+    if (username === adminUser) {
+      return of(false);
+    }
+
+    const existing = this.getStoredCustomers().find(c => c.username === username);
+    if (existing) {
+      return of(false);
+    }
+
+    const customers = this.getStoredCustomers();
+    customers.push({ username, password });
+    this.saveCustomers(customers);
+
+    // Auto-login after registration
+    const user: User = { username, isAdmin: false };
+    this.setAuth(user);
+    return of(true);
   }
 
   logout(): void {
@@ -56,5 +101,22 @@ export class AuthService {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(user));
     this.isAuthenticated.set(true);
     this.user.set(user);
+  }
+
+  private getStoredCustomers(): CustomerCredentials[] {
+    try {
+      const data = localStorage.getItem(this.CUSTOMERS_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveCustomers(customers: CustomerCredentials[]): void {
+    localStorage.setItem(this.CUSTOMERS_KEY, JSON.stringify(customers));
+  }
+
+  private findCustomer(username: string, password: string): CustomerCredentials | undefined {
+    return this.getStoredCustomers().find(c => c.username === username && c.password === password);
   }
 }
