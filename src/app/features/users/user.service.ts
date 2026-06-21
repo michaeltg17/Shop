@@ -1,19 +1,14 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { User } from './user';
 import { HttpClient } from '@angular/common/http';
 import { catchError, of, tap } from 'rxjs';
 import { EMPTY } from 'rxjs';
-
-export interface UserCredentials {
-  username: string;
-  password: string;
-}
+import { User, FakeStoreUser, fakeStoreUserToUser, userToFakeStoreUser } from './user';
 
 @Injectable({
   providedIn: 'root',
 })
 export class UserService {
-  private usersUrl = 'api/users';
+  private usersUrl = 'https://fakestoreapi.com/users';
   users = signal<User[]>([]);
   loading = signal(false);
   error = signal<string | null>(null);
@@ -29,14 +24,10 @@ export class UserService {
     this.error.set(null);
 
     this.http
-      .get<User[]>(this.usersUrl)
+      .get<FakeStoreUser[]>(this.usersUrl)
       .pipe(
-        tap(users => {
-          users.forEach(u => {
-            if (typeof u.isActive === 'string') {
-              u.isActive = u.isActive === 'true';
-            }
-          });
+        tap(fakeUsers => {
+          const users = fakeUsers.map(fakeStoreUserToUser);
           this.users.set(users);
         }),
         catchError(() => {
@@ -51,10 +42,25 @@ export class UserService {
   }
 
   addUser(user: User) {
+    const fakeUser = {
+      username: user.email.split('@')[0],
+      password: 'password123',
+      email: user.email,
+      name: {
+        firstname: user.firstName,
+        lastname: user.lastName,
+      },
+      phone: user.phoneNumber,
+    };
+
     this.http
-      .post<User>(this.usersUrl, user)
+      .post<FakeStoreUser>(this.usersUrl, fakeUser)
       .pipe(
-        tap(newUser => {
+        tap(fakeUser => {
+          const newUser: User = {
+            ...fakeStoreUserToUser(fakeUser),
+            ...user,
+          };
           const current = this.users();
           this.users.set([...current, newUser]);
         }),
@@ -67,8 +73,10 @@ export class UserService {
   }
 
   updateUser(user: User) {
+    const fakePayload = userToFakeStoreUser(user);
+
     this.http
-      .put<User>(`${this.usersUrl}/${user.id}`, user)
+      .patch<FakeStoreUser>(`${this.usersUrl}/${user.id}`, fakePayload)
       .pipe(
         tap(() => {
           const current = this.users();
@@ -87,19 +95,46 @@ export class UserService {
       .subscribe();
   }
 
-  deleteUsers(ids: number[]) {
+  deleteUser(id: number) {
     this.http
-      .delete(this.usersUrl, { body: ids })
+      .delete(`${this.usersUrl}/${id}`)
       .pipe(
         tap(() => {
           const current = this.users();
-          this.users.set(current.filter(u => !ids.includes(u.id)));
+          this.users.set(current.filter(u => u.id !== id));
         }),
         catchError(() => {
-          this.error.set('Failed to delete users');
+          this.error.set('Failed to delete user');
           return EMPTY;
         })
       )
       .subscribe();
+  }
+
+  deleteUsers(ids: number[]) {
+    // Fake Store API doesn't support batch delete, so delete one by one
+    let remaining = [...ids];
+
+    const deleteNext = () => {
+      if (remaining.length === 0) {
+        // Clean up local state after all deletes complete
+        const current = this.users();
+        this.users.set(current.filter(u => !ids.includes(u.id)));
+        return;
+      }
+
+      const id = remaining.shift()!;
+      this.http.delete(`${this.usersUrl}/${id}`).subscribe({
+        error: () => {
+          this.error.set(`Failed to delete user ${id}`);
+          deleteNext();
+        },
+        next: () => {
+          deleteNext();
+        },
+      });
+    };
+
+    deleteNext();
   }
 }
