@@ -52,3 +52,12 @@ Thumbs.db
 # Environment variables
 .env
 .worker-lock
+
+# .NET/C#
+**/bin/
+**/obj/
+*.sln.docstates
+*.suo
+*.user
+*.userosscache
+*.sln.opened
