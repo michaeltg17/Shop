@@ -154,9 +154,7 @@ export const handlers = [
       password: string;
     };
 
-    const user = fakeUsers.find(
-      u => u.username === username && u.password === password
-    );
+    const user = fakeUsers.find(u => u.username === username && u.password === password);
 
     if (!user) {
       return new HttpResponse('Invalid username or password', { status: 401 });

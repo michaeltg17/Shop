@@ -43,13 +43,13 @@ describe('AuthService', () => {
     expect(service.user()?.isAdmin).toBe(true);
   });
 
-  it('should return false for invalid admin credentials (falls back to local then FSA 401)', (done) => {
+  it('should return false for invalid admin credentials (falls back to local then FSA 401)', done => {
     service.login('wrong', 'wrong').subscribe(success => {
       expect(success).toBe(false);
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
   it('should clear auth state on logout', () => {
@@ -93,7 +93,7 @@ describe('AuthService', () => {
     localStorage.getItem = originalGetItem;
   });
 
-  it('should register a new customer (FSA fails, falls back to local)', (done) => {
+  it('should register a new customer (FSA fails, falls back to local)', done => {
     service.register('customer1', 'pass123').subscribe(success => {
       expect(success).toBe(true);
       expect(service.isAuthenticated()).toBe(true);
@@ -102,7 +102,7 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
   it('should return false when registering with empty username', () => {
@@ -125,7 +125,7 @@ describe('AuthService', () => {
     });
   });
 
-  it('should return false when registering duplicate username', (done) => {
+  it('should return false when registering duplicate username', done => {
     service.register('customer1', 'pass123').subscribe(() => {
       service.logout();
       service.register('customer1', 'different').subscribe(success => {
@@ -139,7 +139,7 @@ describe('AuthService', () => {
     req1.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should login a registered customer (FSA fails, falls back to local)', (done) => {
+  it('should login a registered customer (FSA fails, falls back to local)', done => {
     service.register('customer1', 'pass123').subscribe(() => {
       service.logout();
       service.login('customer1', 'pass123').subscribe(success => {
@@ -156,16 +156,16 @@ describe('AuthService', () => {
     req1.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should return false for unregistered customer login', (done) => {
+  it('should return false for unregistered customer login', done => {
     service.login('nonexistent', 'pass123').subscribe(success => {
       expect(success).toBe(false);
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
-  it('should return false for wrong password on registered customer', (done) => {
+  it('should return false for wrong password on registered customer', done => {
     service.register('customer1', 'pass123').subscribe(() => {
       service.logout();
       service.login('customer1', 'wrongpass').subscribe(success => {
@@ -179,7 +179,7 @@ describe('AuthService', () => {
     req1.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should auto-login after registration (FSA fails → local)', (done) => {
+  it('should auto-login after registration (FSA fails → local)', done => {
     service.register('customer1', 'pass123').subscribe(success => {
       expect(success).toBe(true);
       expect(service.isAuthenticated()).toBe(true);
@@ -187,10 +187,10 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should persist customers across storage reads', (done) => {
+  it('should persist customers across storage reads', done => {
     service.register('customer1', 'pass123').subscribe(() => {
       service.logout();
       const newService = TestBed.inject(AuthService);
@@ -206,7 +206,7 @@ describe('AuthService', () => {
     req1.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should handle localStorage errors gracefully when getting customers', (done) => {
+  it('should handle localStorage errors gracefully when getting customers', done => {
     const originalGetItem = localStorage.getItem;
     localStorage.getItem = jest.fn(() => {
       throw new Error('QuotaExceededError');
@@ -218,10 +218,10 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
-  it('should return false for admin login with wrong password', (done) => {
+  it('should return false for admin login with wrong password', done => {
     service.login('admin', 'wrongpass').subscribe(success => {
       expect(success).toBe(false);
       done();
@@ -231,25 +231,25 @@ describe('AuthService', () => {
     req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
-  it('should return false for admin login with wrong username', (done) => {
+  it('should return false for admin login with wrong username', done => {
     service.login('wrongadmin', 'password').subscribe(success => {
       expect(success).toBe(false);
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
-  it('should return false for empty credentials', (done) => {
+  it('should return false for empty credentials', done => {
     service.login('', '').subscribe(success => {
       expect(success).toBe(false);
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
-  it('should handle malformed JSON in localStorage for customers', (done) => {
+  it('should handle malformed JSON in localStorage for customers', done => {
     localStorage.setItem('angular_customers', 'not-json');
     const service2 = TestBed.inject(AuthService);
     service2.login('test', 'test').subscribe(success => {
@@ -257,7 +257,7 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/login`);
-    req.flush("Invalid", { status: 401, statusText: "Unauthorized" });
+    req.flush('Invalid', { status: 401, statusText: 'Unauthorized' });
   });
 
   it('should handle malformed JSON in localStorage for auth', () => {
@@ -266,7 +266,7 @@ describe('AuthService', () => {
     expect(service2.user()).toBeNull();
   });
 
-  it('should handle malformed JSON in localStorage for customers (register)', (done) => {
+  it('should handle malformed JSON in localStorage for customers (register)', done => {
     localStorage.setItem('angular_customers', 'not-json');
     const service2 = TestBed.inject(AuthService);
     service2.register('malformed-test', 'test123').subscribe(success => {
@@ -276,10 +276,10 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should login a registered customer after logout and re-login', (done) => {
+  it('should login a registered customer after logout and re-login', done => {
     service.register('relogin', 'pw').subscribe(() => {
       service.logout();
       service.login('relogin', 'pw').subscribe(success => {
@@ -295,7 +295,7 @@ describe('AuthService', () => {
     req1.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should return false when trying to login a registered customer with wrong password', (done) => {
+  it('should return false when trying to login a registered customer with wrong password', done => {
     service.register('pw-check', 'correct').subscribe(() => {
       service.logout();
       service.login('pw-check', 'wrong').subscribe(success => {
@@ -318,7 +318,7 @@ describe('AuthService', () => {
     expect(localStorage.getItem('angular_auth_user')).toBeNull();
   });
 
-  it('should set auth correctly after customer registration and clear on logout', (done) => {
+  it('should set auth correctly after customer registration and clear on logout', done => {
     service.register('logout-test', 'pw').subscribe(() => {
       expect(service.user()?.isAdmin).toBe(false);
       service.logout();
@@ -327,10 +327,10 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should register multiple customers and login with each', (done) => {
+  it('should register multiple customers and login with each', done => {
     service.register('user1', 'pass1').subscribe(() => {
       service.logout();
       service.register('user2', 'pass2').subscribe(() => {
@@ -357,7 +357,7 @@ describe('AuthService', () => {
     req1a.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should handle localStorage setItem errors during registration gracefully', (done) => {
+  it('should handle localStorage setItem errors during registration gracefully', done => {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
@@ -371,7 +371,7 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
   it('should handle localStorage setItem errors during login gracefully', () => {
@@ -393,17 +393,17 @@ describe('AuthService', () => {
     expect(stored).toBe(JSON.stringify({ username: 'admin', isAdmin: true }));
   });
 
-  it('should set localStorage correctly during customer registration', (done) => {
+  it('should set localStorage correctly during customer registration', done => {
     service.register('testuser', 'testpass').subscribe(() => {
       const stored = localStorage.getItem('angular_auth_user');
       expect(stored).toBe(JSON.stringify({ username: 'testuser', isAdmin: false }));
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should save customers to localStorage during registration', (done) => {
+  it('should save customers to localStorage during registration', done => {
     service.register('testuser', 'testpass').subscribe(() => {
       const stored = localStorage.getItem('angular_customers');
       const customers = JSON.parse(stored!);
@@ -411,10 +411,10 @@ describe('AuthService', () => {
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should not modify customer list when registration fails due to duplicate', (done) => {
+  it('should not modify customer list when registration fails due to duplicate', done => {
     service.register('dup', 'pass1').subscribe(() => {
       service.logout();
       const before = localStorage.getItem('angular_customers');
@@ -460,16 +460,16 @@ describe('AuthService', () => {
     expect(fresh.user()?.isAdmin).toBe(true);
   });
 
-  it('should handle empty password registration', (done) => {
+  it('should handle empty password registration', done => {
     service.register('user', ' ').subscribe(success => {
       expect(success).toBe(true);
       done();
     });
     const req = httpMock.expectOne(`${fakestoreAuthUrl}/register`);
-    req.flush("Username already exists", { status: 409, statusText: "Conflict" });
+    req.flush('Username already exists', { status: 409, statusText: 'Conflict' });
   });
 
-  it('should handle login with customer that has empty password', (done) => {
+  it('should handle login with customer that has empty password', done => {
     // register('empty-pw', '') returns false (empty password check)
     // so we manually save the customer to localStorage and test login
     localStorage.setItem(
