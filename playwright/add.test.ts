@@ -21,6 +21,11 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
     active: true,
   });
 
+  // Trigger Angular OnPush change detection by pressing Tab (fill() alone may not
+  // trigger CD reliably in headless Chromium). This moves focus away from the
+  // last filled input, causing Angular to re-evaluate the form validity.
+  await page.keyboard.press('Tab');
+
   // click Add button in dialog
   await expect(formPage.addButton).toBeEnabled();
 
