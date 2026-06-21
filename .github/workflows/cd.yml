@@ -1,15 +1,4 @@
 name: cd
-
-# Staged deployment pipeline:
-#   dev  → automatic (no approval gate)
-#   qa   → requires manual approval (environment gate)
-#   prod → requires michaeltg17 approval (environment gate)
-#
-# GitHub Settings configuration required:
-#   - Environments > qa:    enable "Required reviewers" → add michaeltg17
-#   - Environments > prod:  enable "Required reviewers" → add michaeltg17
-#   - Auto-approval disabled: QA and PROD require explicit reviewer approval
-
 on:
   workflow_run:
     workflows: ["ci"]
@@ -18,12 +7,11 @@ on:
     branches: [main]
 
 jobs:
-  # ── DEV: automatic, no approval gate ──────────────────────────
   deploy-dev:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: dev
-      url: https://dev.shop.statikk.ddns.net
+      url: https://dev.shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
       - name: Trigger dev deployment
@@ -35,17 +23,15 @@ jobs:
             -H "X-Hub-Signature-256: sha256=${SIGNATURE}" \
             -H "Content-Type: application/json" \
             -d "$BODY" \
-            https://statikk.ddns.net/shop-deploy || echo "⚠ Deploy endpoint unreachable, skipping"
+            https://statikk.mooo.com/deploy-shop || echo "⚠ Deploy endpoint unreachable, skipping"
           exit 0
 
-  # ── QA: requires manual approval via environment gate ─────────
-  # GitHub Settings → Environments → qa → Required reviewers: michaeltg17
   deploy-qa:
     needs: deploy-dev
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: qa
-      url: https://qa.statikk.ddns.net
+      url: https://qa.shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
       - name: Trigger qa deployment
@@ -57,17 +43,15 @@ jobs:
             -H "X-Hub-Signature-256: sha256=${SIGNATURE}" \
             -H "Content-Type: application/json" \
             -d "$BODY" \
-            https://deploy.statikk.ddns.net || echo "⚠ Deploy endpoint unreachable, skipping"
+            https://statikk.mooo.com/deploy-shop || echo "⚠ Deploy endpoint unreachable, skipping"
           exit 0
 
-  # ── PROD: requires michaeltg17 approval via environment gate ──
-  # GitHub Settings → Environments → prod → Required reviewers: michaeltg17
   deploy-prod:
     needs: deploy-qa
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: prod
-      url: https://app.statikk.ddns.net
+      url: https://shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
       - name: Trigger prod deployment
@@ -79,5 +63,5 @@ jobs:
             -H "X-Hub-Signature-256: sha256=${SIGNATURE}" \
             -H "Content-Type: application/json" \
             -d "$BODY" \
-            https://deploy.statikk.ddns.net || echo "⚠ Deploy endpoint unreachable, skipping"
+            https://statikk.mooo.com/deploy-shop || echo "⚠ Deploy endpoint unreachable, skipping"
           exit 0
