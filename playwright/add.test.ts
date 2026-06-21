@@ -40,6 +40,20 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
   await page.waitForTimeout(1000);
   await page.waitForSelector('tr[mat-row]', { timeout: 10000 });
 
+  // Set page size to 50 to ensure all rows are visible (default is 5, pagination may hide the new row)
+  const pageSizeSelect = page.locator('mat-paginator mat-select');
+  await pageSizeSelect.click();
+  const option50 = page.locator('mat-option:has-text("50")');
+  if (await option50.count() > 0) {
+    await option50.click();
+  } else {
+    // fallback: select the largest available option
+    const lastOption = page.locator('mat-option').last();
+    await lastOption.click();
+  }
+  // Wait for paginator to apply
+  await page.waitForTimeout(500);
+
   // Verify the user appears as a row in the table with expected data
   const expectedLastName = 'Tester';
   const expectedEmail = `${firstName.toLowerCase()}@example.com`;
