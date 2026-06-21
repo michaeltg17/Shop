@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { UserService, UserCredentials } from './user.service';
-import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { UserService } from './user.service';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { User } from './user';
 
@@ -40,7 +39,14 @@ describe('UserService', () => {
 
   it('should load users from API', () => {
     const mockUsers: User[] = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: true },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: true,
+      },
     ];
 
     service.loadUsers();
@@ -55,7 +61,14 @@ describe('UserService', () => {
 
   it('should skip loading if users already loaded', () => {
     const mockUsers: User[] = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: true },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: true,
+      },
     ];
 
     // First load
@@ -80,7 +93,14 @@ describe('UserService', () => {
 
   it('should convert string isActive to boolean on load', () => {
     const mockUsers = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: 'true' as unknown as boolean },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: 'true' as unknown as boolean,
+      },
     ];
 
     service.loadUsers();
@@ -93,11 +113,25 @@ describe('UserService', () => {
 
   it('should add a new user', () => {
     const existingUsers: User[] = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: true },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: true,
+      },
     ];
     service.users.set(existingUsers);
 
-    const newUser: User = { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@test.com', phoneNumber: '456', isActive: true };
+    const newUser: User = {
+      id: 2,
+      firstName: 'Jane',
+      lastName: 'Smith',
+      email: 'jane@test.com',
+      phoneNumber: '456',
+      isActive: true,
+    };
 
     service.addUser(newUser);
 
@@ -110,7 +144,14 @@ describe('UserService', () => {
   });
 
   it('should set error on add failure', () => {
-    const newUser: User = { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@test.com', phoneNumber: '456', isActive: true };
+    const newUser: User = {
+      id: 2,
+      firstName: 'Jane',
+      lastName: 'Smith',
+      email: 'jane@test.com',
+      phoneNumber: '456',
+      isActive: true,
+    };
 
     service.addUser(newUser);
 
@@ -122,12 +163,33 @@ describe('UserService', () => {
 
   it('should update an existing user', () => {
     const existingUsers: User[] = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: true },
-      { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@test.com', phoneNumber: '456', isActive: true },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: true,
+      },
+      {
+        id: 2,
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@test.com',
+        phoneNumber: '456',
+        isActive: true,
+      },
     ];
     service.users.set(existingUsers);
 
-    const updatedUser: User = { id: 1, firstName: 'John', lastName: 'Updated', email: 'john@updated.com', phoneNumber: '789', isActive: false };
+    const updatedUser: User = {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Updated',
+      email: 'john@updated.com',
+      phoneNumber: '789',
+      isActive: false,
+    };
 
     service.updateUser(updatedUser);
 
@@ -140,7 +202,14 @@ describe('UserService', () => {
   });
 
   it('should set error on update failure', () => {
-    const updatedUser: User = { id: 1, firstName: 'John', lastName: 'Updated', email: 'john@updated.com', phoneNumber: '789', isActive: false };
+    const updatedUser: User = {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Updated',
+      email: 'john@updated.com',
+      phoneNumber: '789',
+      isActive: false,
+    };
 
     service.updateUser(updatedUser);
 
@@ -152,9 +221,30 @@ describe('UserService', () => {
 
   it('should delete users by ids', () => {
     const existingUsers: User[] = [
-      { id: 1, firstName: 'John', lastName: 'Doe', email: 'john@test.com', phoneNumber: '123', isActive: true },
-      { id: 2, firstName: 'Jane', lastName: 'Smith', email: 'jane@test.com', phoneNumber: '456', isActive: true },
-      { id: 3, firstName: 'Bob', lastName: 'Brown', email: 'bob@test.com', phoneNumber: '789', isActive: true },
+      {
+        id: 1,
+        firstName: 'John',
+        lastName: 'Doe',
+        email: 'john@test.com',
+        phoneNumber: '123',
+        isActive: true,
+      },
+      {
+        id: 2,
+        firstName: 'Jane',
+        lastName: 'Smith',
+        email: 'jane@test.com',
+        phoneNumber: '456',
+        isActive: true,
+      },
+      {
+        id: 3,
+        firstName: 'Bob',
+        lastName: 'Brown',
+        email: 'bob@test.com',
+        phoneNumber: '789',
+        isActive: true,
+      },
     ];
     service.users.set(existingUsers);
 
