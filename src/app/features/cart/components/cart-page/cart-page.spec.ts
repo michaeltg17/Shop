@@ -23,9 +23,11 @@ describe('CartPage', () => {
     rating: { rate: 4.5, count: 100 },
   };
 
-  const mockSnackBar = { open: jest.fn() };
+  let snackBarOpenSpy: jest.SpyInstance;
 
   beforeEach(async () => {
+    TestBed.resetTestingModule();
+
     router = {
       navigate: jest.fn().mockReturnValue(Promise.resolve(true)),
     };
@@ -50,12 +52,13 @@ describe('CartPage', () => {
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: { snapshot: { data: {} }, paramMap: {} } },
         { provide: CartService, useValue: cartService },
-        { provide: import('@angular/material/snack-bar').MatSnackBar, useValue: mockSnackBar },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CartPage);
     component = fixture.componentInstance;
+    // Spy on the MatSnackBar instance injected into the component
+    snackBarOpenSpy = jest.spyOn(component['snackBar'], 'open');
     fixture.detectChanges();
   });
 
@@ -161,7 +164,7 @@ describe('CartPage', () => {
   it('should show snackbar when removing item', () => {
     const item: CartItem = { product: mockProduct, quantity: 1 };
     component.removeItem(item);
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
+    expect(snackBarOpenSpy).toHaveBeenCalledWith(
       `Removed ${mockProduct.title} from cart`,
       'Close',
       { duration: 2000 }
@@ -170,11 +173,9 @@ describe('CartPage', () => {
 
   it('should show snackbar when no items selected for checkout', () => {
     component.checkout();
-    expect(mockSnackBar.open).toHaveBeenCalledWith(
-      'Select at least one item to checkout',
-      'Close',
-      { duration: 3000 }
-    );
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Select at least one item to checkout', 'Close', {
+      duration: 3000,
+    });
   });
 
   it('should show success snackbar on checkout', () => {
@@ -183,7 +184,7 @@ describe('CartPage', () => {
     ]);
     fixture.detectChanges();
     component.checkout();
-    expect(mockSnackBar.open).toHaveBeenCalledWith('Order placed successfully!', 'Close', {
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Order placed successfully!', 'Close', {
       duration: 3000,
     });
   });

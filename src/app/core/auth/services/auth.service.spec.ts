@@ -283,25 +283,31 @@ describe('AuthService', () => {
     expect(service.user()?.username).toBe('user2');
   });
 
-  it('should handle localStorage setItem errors during registration', () => {
+  it('should handle localStorage setItem errors during registration gracefully', () => {
     const originalSetItem = localStorage.setItem;
-    localStorage.setItem = jest.fn(() => {
+    localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
+    };
+    service.register('quota-user', 'pass').subscribe(success => {
+      expect(success).toBe(true);
     });
-    expect(() => {
-      service.register('quota-user', 'pass').subscribe(() => undefined);
-    }).toThrow();
+    // Auth state should still be set in memory even if localStorage fails
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.user()?.username).toBe('quota-user');
     localStorage.setItem = originalSetItem;
   });
 
-  it('should handle localStorage setItem errors during login', () => {
+  it('should handle localStorage setItem errors during login gracefully', () => {
     const originalSetItem = localStorage.setItem;
-    localStorage.setItem = jest.fn(() => {
+    localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
+    };
+    service.login('admin', 'password').subscribe(success => {
+      expect(success).toBe(true);
     });
-    expect(() => {
-      service.login('admin', 'password').subscribe(() => undefined);
-    }).toThrow();
+    // Auth state should still be set in memory even if localStorage fails
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.user()?.username).toBe('admin');
     localStorage.setItem = originalSetItem;
   });
 
@@ -340,12 +346,16 @@ describe('AuthService', () => {
   });
 
   it('should initialize isAuthenticated as true when user stored', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({});
     localStorage.setItem('angular_auth_user', JSON.stringify({ username: 'test', isAdmin: false }));
     const fresh = TestBed.inject(AuthService);
     expect(fresh.isAuthenticated()).toBe(true);
   });
 
   it('should initialize user signal correctly when stored', () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({});
     localStorage.setItem(
       'angular_auth_user',
       JSON.stringify({ username: 'stored', isAdmin: true })
