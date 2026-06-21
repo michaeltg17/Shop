@@ -582,9 +582,10 @@ describe('UsersTable', () => {
   });
 
   it('should show snackbar with correct duration on error', () => {
+    const snackBarOpenSpy = jest.spyOn(component['snackBar'], 'open');
     (userService.error as unknown as WritableSignal<string | null>).set('Error message');
     fixture.detectChanges();
-    expect(snackBar.open).toHaveBeenCalledWith('Error message', 'Close', { duration: 4000 });
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Error message', 'Close', { duration: 4000 });
   });
 
   it('should not show snackbar when error is null', () => {

@@ -284,29 +284,31 @@ describe('AuthService', () => {
   });
 
   it('should handle localStorage setItem errors during registration gracefully', () => {
-    const setItemSpy = jest.spyOn(localStorage, 'setItem').mockImplementation(() => {
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
-    });
+    };
     service.register('quota-user', 'pass').subscribe(success => {
       expect(success).toBe(true);
     });
     // Auth state should still be set in memory even if localStorage fails
     expect(service.isAuthenticated()).toBe(true);
     expect(service.user()?.username).toBe('quota-user');
-    setItemSpy.mockRestore();
+    localStorage.setItem = originalSetItem;
   });
 
   it('should handle localStorage setItem errors during login gracefully', () => {
-    const setItemSpy = jest.spyOn(localStorage, 'setItem').mockImplementation(() => {
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
-    });
+    };
     service.login('admin', 'password').subscribe(success => {
       expect(success).toBe(true);
     });
     // Auth state should still be set in memory even if localStorage fails
     expect(service.isAuthenticated()).toBe(true);
     expect(service.user()?.username).toBe('admin');
-    setItemSpy.mockRestore();
+    localStorage.setItem = originalSetItem;
   });
 
   it('should set localStorage correctly during admin login', () => {
