@@ -113,17 +113,17 @@ export class UserService {
 
   deleteUsers(ids: number[]) {
     // Fake Store API doesn't support batch delete, so delete one by one
-    let remaining = [...ids];
+    let index = 0;
 
     const deleteNext = () => {
-      if (remaining.length === 0) {
+      if (index >= ids.length) {
         // Clean up local state after all deletes complete
         const current = this.users();
         this.users.set(current.filter(u => !ids.includes(u.id)));
         return;
       }
 
-      const id = remaining.shift()!;
+      const id = ids[index++];
       this.http.delete(`${this.usersUrl}/${id}`).subscribe({
         error: () => {
           this.error.set(`Failed to delete user ${id}`);

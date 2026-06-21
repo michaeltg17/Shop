@@ -1,16 +1,15 @@
 # dev24-7 Worker State
 
-Status: WAITING_FOR_CI — PR #104
-Started: 2026-06-21T16:28+02:00
+Status: WAITING_FOR_CI — PR #104 (re-pushed fix)
+Started: 2026-06-21T17:30+02:00
 Branch: feature/90-fakestoreapi-integration
 PR: https://github.com/michaeltg17/Angular/pull/104
-CI: pending (just pushed)
+CI: re-running after prettier fix
 
 What was done:
-- Fixed 3 compilation errors (HttpClient constructor, FakeStoreUser mapping, MSW setupWorker)
-- Rewrote user.service.spec.ts for new FSA URLs, PATCH method, batch delete
-- Rewrote auth.service.spec.ts for HttpClient + HTTP mocking (FSA → local fallback pattern)
-- All 376 tests passing, build passes
-- Pushed and opened PR #104
+- Previous CI failed on prettier formatting (auth.service.spec.ts, handlers.ts)
+- Applied prettier --write to both files
+- Pushed fix commit (53ede76)
+- CI re-running
 
-Next: Check CI status on PR #104, merge if green
+Next: Check CI status, merge if green
