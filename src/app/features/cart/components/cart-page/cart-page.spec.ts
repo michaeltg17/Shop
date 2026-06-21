@@ -174,11 +174,9 @@ describe('CartPage', () => {
 
   it('should show snackbar when no items selected for checkout', () => {
     component.checkout();
-    expect(snackBarOpenSpy).toHaveBeenCalledWith(
-      'Select at least one item to checkout',
-      'Close',
-      { duration: 3000 }
-    );
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Select at least one item to checkout', 'Close', {
+      duration: 3000,
+    });
   });
 
   it('should show success snackbar on checkout', () => {
