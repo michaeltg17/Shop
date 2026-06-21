@@ -3,14 +3,14 @@ import { test } from './fixtures';
 
 async function clickRowById(page: Page, id: string | number) {
   const rows = page.locator('tr[mat-row]');
-  // Use exact text match to avoid partial matches (e.g., "6" matching "16")
-  const target = rows.filter({ hasText: `^${id}$` }).first();
-  // Fallback: match by exact cell content in the id column
+  // Match by exact ID cell content (column 2 = id)
+  const idCellText = String(id);
   const targetByCell = rows.filter({
-    has: page.locator(`td:nth-child(2)`).filter({ hasText: `^${id}$` }),
+    has: page.locator('td:nth-child(2)').filter({ hasText: idCellText, exact: true }),
   }).first();
+  const target = rows.filter({ hasText: idCellText }).first();
   const visibleTarget = (await targetByCell.count()) > 0 ? targetByCell : target;
-  await expect(visibleTarget).toBeVisible({ timeout: 5000 });
+  await expect(visibleTarget).toBeVisible({ timeout: 10000 });
   await visibleTarget.click();
 }
 

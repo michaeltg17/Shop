@@ -41,8 +41,12 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
   await page.waitForSelector('tr[mat-row]', { timeout: 10000 });
 
   // Set page size to 50 to ensure all rows are visible (default is 5, pagination may hide the new row)
+  // Use keyboard to open the mat-select (avoids mat-paginator-touch-target intercepting pointer events)
   const pageSizeSelect = page.locator('mat-paginator mat-select');
-  await pageSizeSelect.click();
+  await pageSizeSelect.focus();
+  await page.keyboard.press('ArrowDown');
+  // Wait for overlay panel (mat-select uses a panel, not mat-option in a dropdown)
+  await page.waitForSelector('.mat-mdc-select-panel', { timeout: 5000 });
   const option50 = page.locator('mat-option:has-text("50")');
   if (await option50.count() > 0) {
     await option50.click();
