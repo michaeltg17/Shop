@@ -5,7 +5,6 @@ import { CartService } from '../../cart.service';
 import { CartItem } from '../../cart-item';
 import { Product } from '../../../products/product';
 import { signal } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 describe('CartPage', () => {
   let component: CartPage;
