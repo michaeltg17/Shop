@@ -1,7 +1,9 @@
 name: cd
 on:
   workflow_run:
-    workflows: ["ci"]
+    workflows:
+      - "ci-ui"
+      - "ci-api"
     types:
       - completed
     branches: [main]

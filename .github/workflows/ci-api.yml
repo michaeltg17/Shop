@@ -1,0 +1,48 @@
+name: ci-api
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/ci-api.yml'
+      - '.github/workflows/cd.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/**'
+      - '.github/workflows/ci-api.yml'
+      - '.github/workflows/cd.yml'
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api/src
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Shop.sln
+
+      - name: Build
+        run: dotnet build --no-restore Shop.sln
+
+      - name: Run tests
+        run: dotnet test --no-build Shop.sln --verbosity normal
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: api-test-results
+          path: api/**/TestResults/
+          retention-days: 30

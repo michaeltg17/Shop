@@ -1,10 +1,18 @@
-name: ci
+name: ci-ui
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'ui/**'
+      - '.github/workflows/ci-ui.yml'
+      - '.github/workflows/cd.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'ui/**'
+      - '.github/workflows/ci-ui.yml'
+      - '.github/workflows/cd.yml'
 
 jobs:
   ci:
@@ -12,6 +20,9 @@ jobs:
     permissions:
       packages: write
       contents: write
+    defaults:
+      run:
+        working-directory: ui
 
     steps:
       - name: Checkout code
@@ -25,19 +36,19 @@ jobs:
       - name: Cache Stryker incremental results
         uses: actions/cache@v4
         with:
-          path: reports/stryker-incremental.json
+          path: ui/reports/stryker-incremental.json
           key: stryker-incremental
 
       - name: Build CI Docker image
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ui
           push: false
           load: true
           tags: angular-ci:latest
           cache-from: type=gha,scope=ci
           cache-to: type=gha,mode=max,scope=ci
-          file: Dockerfile.ci
+          file: ui/Dockerfile.ci
 
       - name: Run CI pipeline in Docker
         run: docker compose -f docker-compose.ci.yml run --rm ci
@@ -53,7 +64,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ui
           push: false
           cache-from: type=gha,scope=production
           cache-to: type=gha,mode=max,scope=production
@@ -80,7 +91,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/build-push-action@v7
         with:
-          context: .
+          context: ui
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -91,8 +102,6 @@ jobs:
         uses: actions/upload-artifact@v6
         if: always()
         with:
-          name: coverage-reports
-          path: |
-            coverage/
-            reports/
+          name: ui-coverage-reports
+          path: ui/reports/
           retention-days: 30
