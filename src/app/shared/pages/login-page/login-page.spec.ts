@@ -86,6 +86,25 @@ describe('LoginPage', () => {
     expect(router.navigate).not.toHaveBeenCalled();
   });
 
+  // Logout tests
+  it('should call authService.logout() on logout', () => {
+    authServiceSpy.logout = jest.fn();
+    component.onLogout();
+    expect(authServiceSpy.logout).toHaveBeenCalled();
+  });
+
+  it('should clear message and credentials on logout', () => {
+    component.message = 'some error';
+    component.messageError = true;
+    component.credentials = { username: 'admin', password: 'admin123' };
+    authServiceSpy.logout = jest.fn();
+    component.onLogout();
+    expect(component.message).toBeNull();
+    expect(component.messageError).toBe(false);
+    expect(component.credentials.username).toBe('');
+    expect(component.credentials.password).toBe('');
+  });
+
   // Login tests
   it('should set message when credentials are missing', fakeAsync(() => {
     component.credentials = { username: '', password: '' };
