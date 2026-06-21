@@ -51,7 +51,7 @@ describe('UserService', () => {
 
     service.loadUsers();
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     expect(req.request.method).toBe('GET');
     req.flush(mockUsers);
 
@@ -73,17 +73,18 @@ describe('UserService', () => {
 
     // First load
     service.loadUsers();
-    httpMock.expectOne('/api/users').flush(mockUsers);
+    httpMock.expectOne('api/users').flush(mockUsers);
 
     // Second load should not make HTTP request
+    const pendingReqs = httpMock.match();
     service.loadUsers();
-    expect(httpMock.requestCount).toBe(0);
+    expect(httpMock.match()).toEqual(pendingReqs);
   });
 
   it('should set error on load failure', () => {
     service.loadUsers();
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(service.error()).toBe('Failed to load users');
@@ -105,7 +106,7 @@ describe('UserService', () => {
 
     service.loadUsers();
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     req.flush(mockUsers);
 
     expect(service.users()[0].isActive).toBe(true);
@@ -135,7 +136,7 @@ describe('UserService', () => {
 
     service.addUser(newUser);
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual(newUser);
     req.flush(newUser);
@@ -155,7 +156,7 @@ describe('UserService', () => {
 
     service.addUser(newUser);
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(service.error()).toBe('Failed to add user');
@@ -193,7 +194,7 @@ describe('UserService', () => {
 
     service.updateUser(updatedUser);
 
-    const req = httpMock.expectOne('/api/users/1');
+    const req = httpMock.expectOne(`api/users/${updatedUser.id}`);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(updatedUser);
     req.flush(updatedUser);
@@ -213,7 +214,7 @@ describe('UserService', () => {
 
     service.updateUser(updatedUser);
 
-    const req = httpMock.expectOne('/api/users/1');
+    const req = httpMock.expectOne(`api/users/${updatedUser.id}`);
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(service.error()).toBe('Failed to update user');
@@ -252,10 +253,10 @@ describe('UserService', () => {
 
     service.deleteUsers(idsToDelete);
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     expect(req.request.method).toBe('DELETE');
     expect(req.request.body).toEqual(idsToDelete);
-    req.flush(null, { status: 204 });
+    req.flush(null, { status: 204, statusText: 'No Content' });
 
     expect(service.users()).toEqual([existingUsers[1]]);
   });
@@ -263,7 +264,7 @@ describe('UserService', () => {
   it('should set error on delete failure', () => {
     service.deleteUsers([1]);
 
-    const req = httpMock.expectOne('/api/users');
+    const req = httpMock.expectOne('api/users');
     req.flush('Error', { status: 500, statusText: 'Server Error' });
 
     expect(service.error()).toBe('Failed to delete users');
