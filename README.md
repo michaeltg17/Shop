@@ -1,4 +1,4 @@
-## Shop
+## shop
 [![CI](https://github.com/michaeltg17/Angular/actions/workflows/ci.yml/badge.svg)](https://github.com/michaeltg17/Angular/actions/workflows/ci.yml)
 [![CD](https://github.com/michaeltg17/Angular/actions/workflows/cd.yml/badge.svg)](https://github.com/michaeltg17/Angular/actions/workflows/cd.yml)
 ![Coverage total](./badges/coverage-total.svg)
