@@ -36,7 +36,7 @@ export class CustomerTablePage {
    * Navigate to the customers page and wait for table to load
    */
   async goto(): Promise<void> {
-    await this.page.goto('/admin/customers');
+    await this.page.goto('/admin/users');
     await this.page.waitForSelector('tr[mat-row]');
   }
 
@@ -241,7 +241,7 @@ export class CustomerFormPage {
   async submitAndWaitForResponse(): Promise<void> {
     await Promise.all([
       this.page.waitForResponse(resp =>
-        resp.url().includes('/api/customers') && resp.status() === 201
+        resp.url().includes('/api/users') && resp.status() === 201
       ),
       this.clickAdd()
     ]);

@@ -9,7 +9,7 @@ async function clickRowById(page: Page, id: string | number) {
 }
 
 test('clicking a row opens view dialog with readonly fields', async ({ page }) => {
-  await page.goto('/admin/customers');
+  await page.goto('/admin/users');
   await page.waitForSelector('tr[mat-row]');
 
   // click the row with id 2 (Jacob Wilson)
