@@ -49,17 +49,15 @@ export class AuthService {
     }
 
     // Customer authentication via API
-    return this.http
-      .post<AuthResponse>('/api/auth/login', { username, password })
-      .pipe(
-        map(response => {
-          this.saveToken(response.token);
-          const user: User = { username: response.username, isAdmin: false };
-          this.setAuth(user);
-          return true;
-        }),
-        catchError(() => of(false))
-      );
+    return this.http.post<AuthResponse>('/api/auth/login', { username, password }).pipe(
+      map(response => {
+        this.saveToken(response.token);
+        const user: User = { username: response.username, isAdmin: false };
+        this.setAuth(user);
+        return true;
+      }),
+      catchError(() => of(false))
+    );
   }
 
   register(

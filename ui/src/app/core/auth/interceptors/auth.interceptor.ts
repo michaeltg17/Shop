@@ -8,10 +8,7 @@ import { AuthService } from '../services/auth.service';
 export class AuthInterceptor implements HttpInterceptor {
   private readonly authService = inject(AuthService);
 
-  intercept(
-    req: HttpRequest<unknown>,
-    next: HttpEventHandler<HttpRequest<unknown>>
-  ): unknown {
+  intercept(req: HttpRequest<unknown>, next: HttpEventHandler<HttpRequest<unknown>>): unknown {
     const token = this.authService.getToken();
 
     if (token) {

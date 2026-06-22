@@ -2,11 +2,7 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CartItem } from './cart-item';
 import { Product } from '../products/product';
-import {
-  OrderService,
-  OrderRequest,
-  OrderResponse,
-} from '../orders/order.service';
+import { OrderService, OrderRequest, OrderResponse } from '../orders/order.service';
 
 @Injectable({
   providedIn: 'root',
