@@ -16,7 +16,7 @@ test.describe('delete flow', () => {
   });
 
   test('delete confirmed removes rows and disables delete when none selected', async ({ page }) => {
-    const deleteBtn = page.locator('app-customers-table').locator('button:has-text("delete")');
+    const deleteBtn = page.locator('app-users-table').locator('button:has-text("delete")');
 
     // delete disabled with no selection
     await expect(deleteBtn).toBeDisabled();
@@ -45,7 +45,7 @@ test.describe('delete flow', () => {
   });
 
   test('canceling delete keeps rows intact', async ({ page }) => {
-    const deleteBtn = page.locator('app-customers-table').locator('button:has-text("delete")');
+    const deleteBtn = page.locator('app-users-table').locator('button:has-text("delete")');
 
     // ensure delete disabled initially
     await expect(deleteBtn).toBeDisabled();

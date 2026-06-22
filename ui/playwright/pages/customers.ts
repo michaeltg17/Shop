@@ -29,7 +29,7 @@ export class CustomerTablePage {
   constructor(page: Page) {
     this.page = page;
     this.tableRows = page.locator('tr[mat-row]');
-    this.addIconButton = page.locator('app-customers-table button[mat-icon-button]').first();
+    this.addIconButton = page.locator('app-users-table button[mat-icon-button]').first();
   }
 
   /**
