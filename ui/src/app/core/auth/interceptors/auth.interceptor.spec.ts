@@ -4,12 +4,13 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { provideHttpClient, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
+import { provideHttpClient, HttpRequest, HttpEvent } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
 import { AuthService } from '../services/auth.service';
 
 describe('AuthInterceptor', () => {
-  type MockHandler = { handle: (req: HttpRequest<unknown>) => HttpEvent };
+  interface MockHandler {
+    handle: (req: HttpRequest<unknown>) => HttpEvent;
 
   let authService: AuthService;
   let httpMock: HttpTestingController;
