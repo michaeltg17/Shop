@@ -18,7 +18,7 @@ test('clicking a row opens view dialog with readonly fields', async ({ page }) =
   // wait for dialog to appear and assert title
   await page.waitForSelector('mat-dialog-container');
   const title = page.locator('mat-dialog-container [mat-dialog-title]');
-  await expect(title).toHaveText(/View Customer/i);
+  await expect(title).toHaveText(/View User/i);
 
   // inputs should have readonly attribute
   const dialogContent = page.locator('mat-dialog-container mat-dialog-content');

@@ -31,7 +31,7 @@ test('Adds correctly - Clicks add button to open add dialog', async ({ page }) =
   await customersPage.waitForDialogClose();
 
   // Wait for URL to settle
-  await page.waitForURL(/\/admin\/customers$/);
+  await page.waitForURL(/\/admin\/users$/);
 
   // Sort by ID descending to bring the newest customer to the first page
   await customersPage.sortByIdDescending();

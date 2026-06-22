@@ -1,16 +1,10 @@
 # dev24-7 Worker State
 
-Status: WORKING — PR #108 ESLint fix #2 pushed, waiting for CI
-Updated: 2026-06-22 08:40 CEST
+Status: Waiting for CI on PR #108
+Issue: #106 reactor UI to use API
 Branch: feature/reactor-ui-api
 PR: #108 (https://github.com/michaeltg17/shop/pull/108)
-Task: #106 - reactor ui to use api and add needed endpoints for it
-
-CI failures so far:
-1. Prettier formatting in order.service.spec.ts → fixed
-2. ESLint 'as any' in auth.interceptor.spec.ts → fixed with MockHandler
-3. ESLint unused import + type vs interface → fixed (150fad9)
-
-Next steps:
-1. Check CI — if green → merge PR, move #106 to Done
-2. Pick next task (#109 or #110)
+Last fix: order.service.spec.ts — req.method → req.request.method
+Commit: f5f377d pushed 2026-06-22 08:53 CEST
+CI: Running — monitoring
+Last updated: 2026-06-22 08:54 CEST
