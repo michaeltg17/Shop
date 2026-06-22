@@ -46,6 +46,8 @@ describe('AuthService', () => {
     service.login('wrong', 'wrong').subscribe(success => {
       expect(success).toBe(false);
     });
+    const req = httpMock.expectOne('/api/auth/login');
+    req.flush({ error: 'invalid' }, { status: 401, statusText: 'Unauthorized' });
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -78,6 +80,7 @@ describe('AuthService', () => {
     const service2 = TestBed.inject(AuthService);
     expect(service2.isAuthenticated()).toBe(false);
     localStorage.getItem = originalGetItem;
+    httpMock.verify();
   });
 
   it('should handle localStorage errors gracefully in getStoredUser', () => {
@@ -88,6 +91,7 @@ describe('AuthService', () => {
     const service2 = TestBed.inject(AuthService);
     expect(service2.user()).toBeNull();
     localStorage.getItem = originalGetItem;
+    httpMock.verify();
   });
 
   // Customer registration tests
@@ -217,12 +221,15 @@ describe('AuthService', () => {
     const req = httpMock.expectOne('/api/auth/login');
     req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
     localStorage.getItem = originalGetItem;
+    httpMock.verify();
   });
 
   it('should return false for admin login with wrong password', () => {
     service.login('admin', 'wrongpass').subscribe(success => {
       expect(success).toBe(false);
     });
+    const req = httpMock.expectOne('/api/auth/login');
+    req.flush({ error: 'wrong password' }, { status: 401, statusText: 'Unauthorized' });
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -230,6 +237,8 @@ describe('AuthService', () => {
     service.login('wrongadmin', 'password').subscribe(success => {
       expect(success).toBe(false);
     });
+    const req = httpMock.expectOne('/api/auth/login');
+    req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -237,6 +246,8 @@ describe('AuthService', () => {
     service.login('', '').subscribe(success => {
       expect(success).toBe(false);
     });
+    const req = httpMock.expectOne('/api/auth/login');
+    req.flush({ error: 'empty' }, { status: 401, statusText: 'Unauthorized' });
     expect(service.isAuthenticated()).toBe(false);
   });
 
@@ -248,6 +259,7 @@ describe('AuthService', () => {
     });
     const req = httpMock.expectOne('/api/auth/login');
     req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
+    httpMock.verify();
   });
 
   it('should handle malformed JSON in localStorage for auth', () => {
@@ -445,15 +457,11 @@ describe('AuthService', () => {
   });
 
   it('should handle login with customer that has empty password', () => {
-    service.register('empty-pw', '').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'empty-pw', email: 'empty-pw@shop.com' });
-    service.logout();
-    service.login('empty-pw', '').subscribe(success => {
-      expect(success).toBe(true);
+    // Empty password returns of(false) synchronously - no API call
+    service.register('empty-pw', '').subscribe(success => {
+      expect(success).toBe(false);
     });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    req2.flush({ token: 'fake-jwt-2', username: 'empty-pw', email: 'empty-pw@shop.com' });
+    expect(service.isAuthenticated()).toBe(false);
   });
 
   it('should return authState as observable that emits current user', () => {

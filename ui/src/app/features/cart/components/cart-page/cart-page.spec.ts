@@ -187,8 +187,8 @@ describe('CartPage', () => {
     ]);
     fixture.detectChanges();
     component.checkout();
-    expect(snackBarOpenSpy).toHaveBeenCalledWith('Order placed successfully!', 'Close', {
-      duration: 3000,
+    expect(snackBarOpenSpy).toHaveBeenCalledWith('Order #1 placed successfully!', 'Close', {
+      duration: 4000,
     });
   });
 
