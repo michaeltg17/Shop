@@ -1,12 +1,5 @@
 # dev24-7 Worker State
 
-Status: WAITING_FOR_CI
-Task: #109 - docs: add API architecture doc + enforce integration-only test policy
-Branch: feature/problem-details
-PR: #111
-CI: ci-api in_progress (run 27936986089)
-Changes:
-  - Replaced all ad-hoc error JSON with Results.Problem() (RFC 7807 ProblemDetails)
-  - Added ProblemDetailsTests.cs with 12 integration tests for all error paths
-Next action: Monitor CI, fix if needed, merge on success
-Last updated: 2026-06-22 09:31 CEST
+Status: STALE — heartbeat cleared (last activity too old)
+Cleared at: 2026-06-22 07:49:13 UTC
+Notes: Worker appears stuck; next run will start fresh.

@@ -130,16 +130,30 @@ app.MapGet("/api/products/{id}", (int id) =>
     .WithName("GetProduct");
 
 // POST /api/products (requires auth)
-app.MapPost("/api/products", ([FromBody] Product product, IAuthService authService) =>
+app.MapPost("/api/products", (HttpContext ctx, [FromBody] Product product) =>
 {
+    if (!ctx.User.Identity!.IsAuthenticated)
+        return Results.Problem(
+            detail: "Authentication required",
+            title: "Unauthorized",
+            statusCode: StatusCodes.Status401Unauthorized,
+            type: "https://tools.ietf.org/html/rfc7235#section-3.1"
+        );
     var newProduct = product with { Id = Interlocked.Increment(ref nextProductId) };
     products.TryAdd(newProduct.Id, newProduct);
     return Results.CreatedAtRoute("GetProduct", new { id = newProduct.Id }, newProduct);
-}).RequireAuthorization();
+});
 
 // PUT /api/products/{id} (requires auth)
-app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
+app.MapPut("/api/products/{id}", (HttpContext ctx, int id, [FromBody] Product product) =>
 {
+    if (!ctx.User.Identity!.IsAuthenticated)
+        return Results.Problem(
+            detail: "Authentication required",
+            title: "Unauthorized",
+            statusCode: StatusCodes.Status401Unauthorized,
+            type: "https://tools.ietf.org/html/rfc7235#section-3.1"
+        );
     if (!products.ContainsKey(id))
         return Results.Problem(
             detail: $"Product with id {id} not found",
@@ -151,11 +165,18 @@ app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
     var updatedProduct = product with { Id = id };
     products[id] = updatedProduct;
     return Results.Ok(updatedProduct);
-}).RequireAuthorization();
+});
 
 // DELETE /api/products/{id} (requires auth)
-app.MapDelete("/api/products/{id}", (int id) =>
+app.MapDelete("/api/products/{id}", (HttpContext ctx, int id) =>
 {
+    if (!ctx.User.Identity!.IsAuthenticated)
+        return Results.Problem(
+            detail: "Authentication required",
+            title: "Unauthorized",
+            statusCode: StatusCodes.Status401Unauthorized,
+            type: "https://tools.ietf.org/html/rfc7235#section-3.1"
+        );
     if (!products.TryRemove(id, out _))
         return Results.Problem(
             detail: $"Product with id {id} not found",
@@ -165,7 +186,7 @@ app.MapDelete("/api/products/{id}", (int id) =>
         );
 
     return Results.NoContent();
-}).RequireAuthorization();
+});
 
 // ── User endpoints (admin panel) ──
 
