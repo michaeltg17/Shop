@@ -1,0 +1,7 @@
+services:
+  ci:
+    build:
+      context: .
+      dockerfile: Dockerfile.ci
+    image: shop-api-ci:latest
+    command: ["/bin/bash", "/src/run-ci.sh"]

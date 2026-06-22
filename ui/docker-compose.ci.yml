@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.ci
-    image: angular-ci:latest
+    image: shop-ui-ci:latest
     environment:
       - DISPLAY=:99
       - NODE_ENV=ci

@@ -1,10 +1,10 @@
 services:
-  shop:
+  shop-api:
     build:
       context: .
       dockerfile: Dockerfile
-    image: shop-ui:latest
-    container_name: shop-ui
+    image: shop-api:latest
+    container_name: shop-api
     ports:
-      - "4201:80"
+      - "5001:8080"
     restart: unless-stopped
