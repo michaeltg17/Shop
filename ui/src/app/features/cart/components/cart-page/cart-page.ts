@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { CartItem } from '../../cart-item';
 import { CommonModule } from '@angular/common';
@@ -11,6 +17,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-cart-page',
@@ -25,6 +32,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatSnackBarModule,
     MatDividerModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './cart-page.html',
   styleUrl: './cart-page.scss',
@@ -36,6 +44,7 @@ export class CartPage {
   private snackBar = inject(MatSnackBar);
 
   shipping = 5.99;
+  isCheckoutLoading = signal(false);
 
   cartItems = this.cartService.cartItems$;
 
@@ -87,12 +96,29 @@ export class CartPage {
   checkout(): void {
     const selected = this.selectedItems;
     if (selected.length === 0) {
-      this.snackBar.open('Select at least one item to checkout', 'Close', { duration: 3000 });
+      this.snackBar.open('Select at least one item to checkout', 'Close', {
+        duration: 3000,
+      });
       return;
     }
 
-    this.cartService.clearCart();
-    this.snackBar.open('Order placed successfully!', 'Close', { duration: 3000 });
-    this.router.navigate(['/shop/products']);
+    this.isCheckoutLoading.set(true);
+
+    this.cartService.placeOrder(this.shipping).subscribe({
+      next: order => {
+        this.cartService.clearCart();
+        this.isCheckoutLoading.set(false);
+        this.snackBar.open(`Order #${order.id} placed successfully!`, 'Close', {
+          duration: 4000,
+        });
+        this.router.navigate(['/shop/products']);
+      },
+      error: () => {
+        this.isCheckoutLoading.set(false);
+        this.snackBar.open('Failed to place order. Please try again.', 'Close', {
+          duration: 4000,
+        });
+      },
+    });
   }
 }

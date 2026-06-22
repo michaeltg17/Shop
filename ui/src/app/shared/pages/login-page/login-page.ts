@@ -68,34 +68,30 @@ export class LoginPage implements OnInit {
     this.message = null;
     this.messageError = false;
 
-    // Simulate API call
-    setTimeout(() => {
+    // Simple validation
+    if (!this.credentials.username || !this.credentials.password) {
       this.isLoginLoading = false;
+      this.message = 'Please enter both username and password';
+      this.messageError = true;
+      return;
+    }
 
-      // Simple validation
-      if (!this.credentials.username || !this.credentials.password) {
-        this.message = 'Please enter both username and password';
-        this.messageError = true;
-        return;
-      }
-
-      // Authenticate via service
-      this.authService
-        .login(this.credentials.username, this.credentials.password)
-        .subscribe(success => {
-          if (success) {
-            const user = this.authService.user();
-            if (user?.isAdmin) {
-              this.router.navigate(['/admin/users']);
-            } else {
-              this.router.navigate(['/shop/products']);
-            }
+    this.authService
+      .login(this.credentials.username, this.credentials.password)
+      .subscribe(success => {
+        this.isLoginLoading = false;
+        if (success) {
+          const user = this.authService.user();
+          if (user?.isAdmin) {
+            this.router.navigate(['/admin/users']);
           } else {
-            this.message = 'Invalid username or password';
-            this.messageError = true;
+            this.router.navigate(['/shop/products']);
           }
-        });
-    }, 1500);
+        } else {
+          this.message = 'Invalid username or password';
+          this.messageError = true;
+        }
+      });
   }
 
   onRegister() {
@@ -103,33 +99,29 @@ export class LoginPage implements OnInit {
     this.message = null;
     this.messageError = false;
 
-    // Simulate API call
-    setTimeout(() => {
+    // Simple validation
+    if (!this.credentials.username || !this.credentials.password) {
       this.isLoginLoading = false;
+      this.message = 'Please enter both username and password';
+      this.messageError = true;
+      return;
+    }
 
-      // Simple validation
-      if (!this.credentials.username || !this.credentials.password) {
-        this.message = 'Please enter both username and password';
-        this.messageError = true;
-        return;
-      }
-
-      // Register via service
-      this.authService
-        .register(this.credentials.username, this.credentials.password)
-        .subscribe(success => {
-          if (success) {
-            this.message = 'Registration successful! Redirecting to shop...';
-            this.messageError = false;
-            setTimeout(() => {
-              this.router.navigate(['/shop/products']);
-            }, 1000);
-          } else {
-            this.message = 'Username already taken';
-            this.messageError = true;
-          }
-        });
-    }, 1500);
+    this.authService
+      .register(this.credentials.username, this.credentials.password)
+      .subscribe(success => {
+        this.isLoginLoading = false;
+        if (success) {
+          this.message = 'Registration successful! Redirecting to shop...';
+          this.messageError = false;
+          setTimeout(() => {
+            this.router.navigate(['/shop/products']);
+          }, 1000);
+        } else {
+          this.message = 'Username already taken';
+          this.messageError = true;
+        }
+      });
   }
 
   switchToLogin() {

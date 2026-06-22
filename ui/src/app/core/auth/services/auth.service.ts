@@ -1,5 +1,7 @@
-import { Injectable, signal } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs';
 
 export interface User {
   username: string;
@@ -11,12 +13,25 @@ export interface CustomerCredentials {
   password: string;
 }
 
+export interface AuthResponse {
+  token: string;
+  username: string;
+  email: string;
+}
+
+export interface RegisterRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly STORAGE_KEY = 'angular_auth_user';
-  private readonly CUSTOMERS_KEY = 'angular_customers';
+  private readonly TOKEN_KEY = 'angular_auth_token';
 
   isAuthenticated = signal<boolean>(this.hasStoredUser());
   user = signal<User | null>(this.getStoredUser());
@@ -26,53 +41,67 @@ export class AuthService {
   }
 
   login(username: string, password: string): Observable<boolean> {
-    // Admin authentication
+    // Admin authentication (local, no API call)
     if (username === 'admin' && password === 'password') {
       const user: User = { username, isAdmin: true };
       this.setAuth(user);
       return of(true);
     }
 
-    // Customer authentication
-    const customer = this.findCustomer(username, password);
-    if (customer) {
-      const user: User = { username: customer.username, isAdmin: false };
-      this.setAuth(user);
-      return of(true);
-    }
-
-    return of(false);
+    // Customer authentication via API
+    return this.http
+      .post<AuthResponse>('/api/auth/login', { username, password })
+      .pipe(
+        map(response => {
+          this.saveToken(response.token);
+          const user: User = { username: response.username, isAdmin: false };
+          this.setAuth(user);
+          return true;
+        }),
+        catchError(() => of(false))
+      );
   }
 
-  register(username: string, password: string): Observable<boolean> {
+  register(
+    username: string,
+    password: string,
+    email: string = `${username}@shop.com`
+  ): Observable<boolean> {
     if (!username || !password) {
       return of(false);
     }
 
-    // Check if username already exists (as customer or admin)
+    // Admin username is reserved
     if (username === 'admin') {
       return of(false);
     }
 
-    const existing = this.getStoredCustomers().find(c => c.username === username);
-    if (existing) {
-      return of(false);
-    }
+    const request: RegisterRequest = { username, email, password };
 
-    const customers = this.getStoredCustomers();
-    customers.push({ username, password });
-    this.saveCustomers(customers);
-
-    // Auto-login after registration
-    const user: User = { username, isAdmin: false };
-    this.setAuth(user);
-    return of(true);
+    return this.http.post<AuthResponse>('/api/auth/register', request).pipe(
+      map(response => {
+        this.saveToken(response.token);
+        const user: User = { username: response.username, isAdmin: false };
+        this.setAuth(user);
+        return true;
+      }),
+      catchError(() => of(false))
+    );
   }
 
   logout(): void {
     localStorage.removeItem(this.STORAGE_KEY);
+    localStorage.removeItem(this.TOKEN_KEY);
     this.isAuthenticated.set(false);
     this.user.set(null);
+  }
+
+  getToken(): string | null {
+    try {
+      return localStorage.getItem(this.TOKEN_KEY);
+    } catch {
+      return null;
+    }
   }
 
   private hasStoredUser(): boolean {
@@ -102,24 +131,11 @@ export class AuthService {
     this.user.set(user);
   }
 
-  private getStoredCustomers(): CustomerCredentials[] {
+  private saveToken(token: string): void {
     try {
-      const data = localStorage.getItem(this.CUSTOMERS_KEY);
-      return data ? JSON.parse(data) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private saveCustomers(customers: CustomerCredentials[]): void {
-    try {
-      localStorage.setItem(this.CUSTOMERS_KEY, JSON.stringify(customers));
+      localStorage.setItem(this.TOKEN_KEY, token);
     } catch {
       /* quota exceeded */
     }
-  }
-
-  private findCustomer(username: string, password: string): CustomerCredentials | undefined {
-    return this.getStoredCustomers().find(c => c.username === username && c.password === password);
   }
 }

@@ -1,11 +1,19 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { Observable } from 'rxjs';
 import { CartItem } from './cart-item';
 import { Product } from '../products/product';
+import {
+  OrderService,
+  OrderRequest,
+  OrderResponse,
+} from '../orders/order.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CartService {
+  private readonly orderService = inject(OrderService);
+
   private cartItems = signal<CartItem[]>([]);
 
   cartItems$ = this.cartItems.asReadonly();
@@ -74,5 +82,20 @@ export class CartService {
 
   getAllItems(): CartItem[] {
     return this.cartItems();
+  }
+
+  placeOrder(shipping: number): Observable<OrderResponse> {
+    const selected = this.getSelectedItems();
+    const request: OrderRequest = {
+      items: selected.map(item => ({
+        productId: item.product.id,
+        productName: item.product.title,
+        price: item.product.price,
+        quantity: item.quantity,
+      })),
+      shipping,
+    };
+
+    return this.orderService.createOrder(request);
   }
 }
