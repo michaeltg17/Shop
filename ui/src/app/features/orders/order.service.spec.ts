@@ -53,7 +53,7 @@ describe('OrderService', () => {
       });
 
       const req = httpMock.expectOne('api/orders');
-      expect(req.method).toBe('POST');
+      expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(mockOrderRequest);
       req.flush(mockOrderResponse);
     });
