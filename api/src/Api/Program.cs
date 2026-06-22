@@ -89,7 +89,12 @@ app.MapPost("/api/auth/register", ([FromBody] RegisterRequest request, IAuthServ
     }
     catch (InvalidOperationException ex)
     {
-        return Results.BadRequest(new { error = ex.Message });
+        return Results.Problem(
+            detail: ex.Message,
+            title: "Bad Request",
+            status: StatusCodes.Status400BadRequest,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+        );
     }
 });
 
@@ -97,7 +102,12 @@ app.MapPost("/api/auth/login", ([FromBody] LoginRequest request, IAuthService au
 {
     var result = authService.Login(request);
     if (result == null)
-        return Results.Json(new { error = "Invalid credentials" }, statusCode: StatusCodes.Status401Unauthorized);
+        return Results.Problem(
+            detail: "Invalid credentials",
+            title: "Unauthorized",
+            status: StatusCodes.Status401Unauthorized,
+            type: "https://tools.ietf.org/html/rfc7235#section-3.1"
+        );
     return Results.Ok(result);
 });
 
@@ -111,7 +121,12 @@ app.MapGet("/api/products", () =>
 app.MapGet("/api/products/{id}", (int id) =>
     products.TryGetValue(id, out var product)
         ? Results.Ok(product)
-        : Results.NotFound())
+        : Results.Problem(
+            detail: $"Product with id {id} not found",
+            title: "Not Found",
+            status: StatusCodes.Status404NotFound,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+        ))
     .WithName("GetProduct");
 
 // POST /api/products (requires auth)
@@ -126,7 +141,12 @@ app.MapPost("/api/products", ([FromBody] Product product, IAuthService authServi
 app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
 {
     if (!products.ContainsKey(id))
-        return Results.NotFound();
+        return Results.Problem(
+            detail: $"Product with id {id} not found",
+            title: "Not Found",
+            status: StatusCodes.Status404NotFound,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+        );
 
     var updatedProduct = product with { Id = id };
     products[id] = updatedProduct;
@@ -137,7 +157,12 @@ app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
 app.MapDelete("/api/products/{id}", (int id) =>
 {
     if (!products.TryRemove(id, out _))
-        return Results.NotFound();
+        return Results.Problem(
+            detail: $"Product with id {id} not found",
+            title: "Not Found",
+            status: StatusCodes.Status404NotFound,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+        );
 
     return Results.NoContent();
 }).RequireAuthorization();
@@ -160,7 +185,12 @@ app.MapPost("/api/users", ([FromBody] AdminUser user) =>
 app.MapPut("/api/users/{id}", (int id, [FromBody] AdminUser user) =>
 {
     if (!users.ContainsKey(id))
-        return Results.NotFound();
+        return Results.Problem(
+            detail: $"User with id {id} not found",
+            title: "Not Found",
+            status: StatusCodes.Status404NotFound,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+        );
 
     var updatedUser = user with { Id = id };
     users[id] = updatedUser;
@@ -203,6 +233,11 @@ app.MapGet("/api/orders", () =>
 app.MapGet("/api/orders/{id}", (int id) =>
     orders.TryGetValue(id, out var order)
         ? Results.Ok(order)
-        : Results.NotFound());
+        : Results.Problem(
+            detail: $"Order with id {id} not found",
+            title: "Not Found",
+            status: StatusCodes.Status404NotFound,
+            type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
+        ));
 
 app.Run();

@@ -1,10 +1,12 @@
 # dev24-7 Worker State
 
-Status: Waiting for CI on PR #108
-Issue: #106 reactor UI to use API
-Branch: feature/reactor-ui-api
-PR: #108 (https://github.com/michaeltg17/shop/pull/108)
-Last fix: order.service.spec.ts — req.method → req.request.method
-Commit: f5f377d pushed 2026-06-22 08:53 CEST
-CI: Running — monitoring
-Last updated: 2026-06-22 08:54 CEST
+Status: WORKING
+Task: #109 - docs: add API architecture doc + enforce integration-only test policy
+Branch: feature/problem-details
+PR: not yet opened
+Progress:
+  - ARCH.md already done (merged in #108)
+  - Replaced all ad-hoc error JSON with Results.Problem() (RFC 7807)
+  - Created ProblemDetailsTests.cs with 12 integration tests for all error paths
+  - Next: commit, push, open PR, wait for CI
+Last updated: 2026-06-22 09:29 CEST
