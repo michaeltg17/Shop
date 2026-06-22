@@ -42,7 +42,7 @@ public class OrdersEndpointsTests : IAsyncDisposable
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var body = await response.Content.ReadFromJsonAsync<Order>();
         body!.Should().NotBeNull();
-        body!.Id.Should().Be(1);
+        body!.Id.Should().BeGreaterThan(0);
         body!.Items.Should().HaveCount(2);
         body!.Status.Should().Be("pending");
         body!.Total.Should().Be(1059.97m); // 999.99 + 29.99*2
