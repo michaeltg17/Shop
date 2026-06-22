@@ -89,7 +89,11 @@ public class UsersEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.DeleteAsync("/api/users", content);
+        var request = new HttpRequestMessage(HttpMethod.Delete, "/api/users")
+        {
+            Content = content
+        };
+        var response = await _client.SendAsync(request);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var getUsersResponse = await _client.GetAsync("/api/users");

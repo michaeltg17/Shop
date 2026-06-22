@@ -13,7 +13,7 @@ public class ProductsEndpointsTests : IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
-    private string _authToken;
+    private string _authToken = "";
     private bool _authenticated = false;
 
     public ProductsEndpointsTests()
