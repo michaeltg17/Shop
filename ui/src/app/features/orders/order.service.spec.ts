@@ -78,7 +78,10 @@ describe('OrderService', () => {
       });
 
       const req = httpMock.expectOne('api/orders');
-      req.flush({ error: 'Internal server error' }, { status: 500, statusText: 'Internal Server Error' });
+      req.flush(
+        { error: 'Internal server error' },
+        { status: 500, statusText: 'Internal Server Error' }
+      );
     });
 
     it('should handle multiple items in order', () => {
