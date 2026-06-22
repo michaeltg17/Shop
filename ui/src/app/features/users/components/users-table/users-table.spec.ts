@@ -5,7 +5,13 @@ import { UserService } from '../../user.service';
 import { UserDialog } from '../user-dialog/user-dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, Router, RouterState, Event as RouterEvent } from '@angular/router';
+import {
+  ActivatedRoute,
+  NavigationEnd,
+  Router,
+  RouterState,
+  Event as RouterEvent,
+} from '@angular/router';
 import { PendingChangesService } from '../../../../core/services/pending-changes.service';
 import { of, Subject } from 'rxjs';
 import { User } from '../../user';
@@ -677,5 +683,288 @@ describe('UsersTable', () => {
     (component as unknown as { ['activeDialogRef']: unknown })['activeDialogRef'] = mockDialogRef;
     expect(component.canDeactivate()).toBe(false);
     confirmSpy.mockRestore();
+  });
+
+  it('should trigger routeEffect isNew branch on NavigationEnd with /new url', () => {
+    const dialogRefMock = {
+      afterClosed: () => of({ firstName: 'New', lastName: 'User', email: 'new@test.com', id: 0 }),
+      close: jest.fn(),
+      componentInstance: {},
+    };
+    (component['dialog'] as MatDialog).open = jest.fn().mockReturnValue(dialogRefMock);
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: 'new' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: () => null },
+            url: urlSegments,
+          },
+          paramMap: { get: () => null },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/new', '/users/new'));
+    fixture.detectChanges();
+
+    expect(component['dialog'].open).toHaveBeenCalledWith(
+      UserDialog,
+      expect.objectContaining({
+        data: expect.objectContaining({ mode: DialogMode.Add }),
+      })
+    );
+  });
+
+  it('should trigger routeEffect view branch on NavigationEnd with /:id url', () => {
+    const dialogRefMock = {
+      afterClosed: () => of(undefined),
+      close: jest.fn(),
+      componentInstance: {},
+    };
+    (component['dialog'] as MatDialog).open = jest.fn().mockReturnValue(dialogRefMock);
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: '1' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+            url: urlSegments,
+          },
+          paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/1', '/users/1'));
+    fixture.detectChanges();
+
+    expect(component['dialog'].open).toHaveBeenCalledWith(
+      UserDialog,
+      expect.objectContaining({
+        data: expect.objectContaining({ mode: DialogMode.View, user: mockUser }),
+      })
+    );
+  });
+
+  it('should trigger routeEffect edit branch on NavigationEnd with /:id/edit url', () => {
+    const dialogRefMock = {
+      afterClosed: () => of({ ...mockUser, firstName: 'Updated' }),
+      close: jest.fn(),
+      componentInstance: {},
+    };
+    (component['dialog'] as MatDialog).open = jest.fn().mockReturnValue(dialogRefMock);
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: '1' }, { path: 'edit' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+            url: urlSegments,
+          },
+          paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/1/edit', '/users/1/edit'));
+    fixture.detectChanges();
+
+    expect(component['dialog'].open).toHaveBeenCalledWith(
+      UserDialog,
+      expect.objectContaining({
+        data: expect.objectContaining({ mode: DialogMode.Edit, user: mockUser }),
+      })
+    );
+  });
+
+  it('should not open dialog when user not found in routeEffect edit branch', () => {
+    const openSpy = jest.fn().mockReturnValue({
+      afterClosed: () => of(undefined),
+      close: jest.fn(),
+      componentInstance: {},
+    });
+    (component['dialog'] as MatDialog).open = openSpy;
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: '999' }, { path: 'edit' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: (key: string) => (key === 'id' ? '999' : null) },
+            url: urlSegments,
+          },
+          paramMap: { get: (key: string) => (key === 'id' ? '999' : null) },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/999/edit', '/users/999/edit'));
+    fixture.detectChanges();
+
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not open dialog when users array is empty', () => {
+    const openSpy = jest.fn().mockReturnValue({
+      afterClosed: () => of(undefined),
+      close: jest.fn(),
+      componentInstance: {},
+    });
+    (component['dialog'] as MatDialog).open = openSpy;
+    (userService.users as unknown as WritableSignal<User[]>).set([]);
+
+    const urlSegments = [{ path: 'new' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: () => null },
+            url: urlSegments,
+          },
+          paramMap: { get: () => null },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/new', '/users/new'));
+    fixture.detectChanges();
+
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not open dialog when id is null and not new', () => {
+    const openSpy = jest.fn().mockReturnValue({
+      afterClosed: () => of(undefined),
+      close: jest.fn(),
+      componentInstance: {},
+    });
+    (component['dialog'] as MatDialog).open = openSpy;
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: 'users' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: () => null },
+            url: urlSegments,
+          },
+          paramMap: { get: () => null },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users', '/users'));
+    fixture.detectChanges();
+
+    expect(openSpy).not.toHaveBeenCalled();
+  });
+
+  it('should call addUser after dialog closes with result', () => {
+    const result = {
+      id: 2,
+      firstName: 'New',
+      lastName: 'User',
+      email: 'new@test.com',
+      phoneNumber: '',
+      isActive: true,
+    };
+    const dialogRefMock = {
+      afterClosed: () => of(result),
+      close: jest.fn(),
+      componentInstance: {},
+    };
+    (component['dialog'] as MatDialog).open = jest.fn().mockReturnValue(dialogRefMock);
+    (router.navigate as jest.Mock).mockResolvedValue(true);
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: 'new' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: () => null },
+            url: urlSegments,
+          },
+          paramMap: { get: () => null },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/new', '/users/new'));
+    fixture.detectChanges();
+
+    // Wait for async effect + dialog callback
+    return new Promise(resolve => setTimeout(resolve, 100)).then(() => {
+      expect(userService.addUser).toHaveBeenCalledWith(result);
+      expect(pendingService.clear).toHaveBeenCalled();
+      expect(pendingService.clearActiveDialog).toHaveBeenCalled();
+    });
+  });
+
+  it('should call updateUser after edit dialog closes with result', () => {
+    const result = { ...mockUser, firstName: 'Updated' };
+    const dialogRefMock = {
+      afterClosed: () => of(result),
+      close: jest.fn(),
+      componentInstance: {},
+    };
+    (component['dialog'] as MatDialog).open = jest.fn().mockReturnValue(dialogRefMock);
+    (router.navigate as jest.Mock).mockResolvedValue(true);
+    (userService.users as unknown as WritableSignal<User[]>).set([mockUser]);
+
+    const urlSegments = [{ path: '1' }, { path: 'edit' }];
+    const newState = {
+      snapshot: {
+        root: {
+          firstChild: {
+            firstChild: null,
+            paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+            url: urlSegments,
+          },
+          paramMap: { get: (key: string) => (key === 'id' ? '1' : null) },
+          url: [],
+        },
+      },
+    };
+    (router.routerState as RouterState).snapshot = newState.snapshot;
+
+    routerEvents.next(new NavigationEnd(0, '/users/1/edit', '/users/1/edit'));
+    fixture.detectChanges();
+
+    return new Promise(resolve => setTimeout(resolve, 100)).then(() => {
+      expect(userService.updateUser).toHaveBeenCalledWith(result);
+      expect(pendingService.clear).toHaveBeenCalled();
+      expect(pendingService.clearActiveDialog).toHaveBeenCalled();
+    });
   });
 });

@@ -4,6 +4,7 @@ using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,20 +50,37 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// In-memory product storage
+// ── In-memory storage ──
+
+// Products
 var seedProducts = new List<Product>
 {
-    new(1, "Laptop", "High-performance laptop", 999.99m),
-    new(2, "Mouse", "Wireless ergonomic mouse", 29.99m),
-    new(3, "Keyboard", "Mechanical keyboard", 79.99m)
+    new(1, "Laptop", "High-performance laptop", 999.99m, "Electronics", "https://placehold.co/400x300/3b82f6/white?text=Laptop", new ProductRating(4.5, 120)),
+    new(2, "Mouse", "Wireless ergonomic mouse", 29.99m, "Electronics", "https://placehold.co/400x300/ef4444/white?text=Mouse", new ProductRating(4.2, 85)),
+    new(3, "Keyboard", "Mechanical keyboard", 79.99m, "Electronics", "https://placehold.co/400x300/22c55e/white?text=Keyboard", new ProductRating(4.7, 200))
 };
 
 var products = new ConcurrentDictionary<int, Product>(seedProducts.ToDictionary(p => p.Id, p => p));
-int nextId = 4;
+int nextProductId = 4;
+
+// Admin Users (for the admin panel)
+var seedUsers = new List<AdminUser>
+{
+    new(1, "Michael", "Garcia", "michael@example.com", "+1-555-0101", true),
+    new(2, "Sarah", "Johnson", "sarah@example.com", "+1-555-0102", true),
+    new(3, "James", "Wilson", "james@example.com", "+1-555-0103", false)
+};
+
+var users = new ConcurrentDictionary<int, AdminUser>(seedUsers.ToDictionary(u => u.Id, u => u));
+int nextUserId = 4;
+
+// Orders
+var orders = new ConcurrentDictionary<int, Order>();
+int nextOrderId = 1;
 
 // ── Auth endpoints ──
 
-app.MapPost("/api/auth/register", (RegisterRequest request, IAuthService authService) =>
+app.MapPost("/api/auth/register", ([FromBody] RegisterRequest request, IAuthService authService) =>
 {
     try
     {
@@ -75,7 +93,7 @@ app.MapPost("/api/auth/register", (RegisterRequest request, IAuthService authSer
     }
 });
 
-app.MapPost("/api/auth/login", (LoginRequest request, IAuthService authService) =>
+app.MapPost("/api/auth/login", ([FromBody] LoginRequest request, IAuthService authService) =>
 {
     var result = authService.Login(request);
     if (result == null)
@@ -97,15 +115,15 @@ app.MapGet("/api/products/{id}", (int id) =>
     .WithName("GetProduct");
 
 // POST /api/products (requires auth)
-app.MapPost("/api/products", (Product product, IAuthService authService) =>
+app.MapPost("/api/products", ([FromBody] Product product, IAuthService authService) =>
 {
-    var newProduct = product with { Id = Interlocked.Increment(ref nextId) };
+    var newProduct = product with { Id = Interlocked.Increment(ref nextProductId) };
     products.TryAdd(newProduct.Id, newProduct);
     return Results.CreatedAtRoute("GetProduct", new { id = newProduct.Id }, newProduct);
 }).RequireAuthorization();
 
 // PUT /api/products/{id} (requires auth)
-app.MapPut("/api/products/{id}", (int id, Product product) =>
+app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
 {
     if (!products.ContainsKey(id))
         return Results.NotFound();
@@ -123,5 +141,68 @@ app.MapDelete("/api/products/{id}", (int id) =>
 
     return Results.NoContent();
 }).RequireAuthorization();
+
+// ── User endpoints (admin panel) ──
+
+// GET /api/users
+app.MapGet("/api/users", () =>
+    users.Values.ToList());
+
+// POST /api/users
+app.MapPost("/api/users", ([FromBody] AdminUser user) =>
+{
+    var newUser = user with { Id = Interlocked.Increment(ref nextUserId) };
+    users.TryAdd(newUser.Id, newUser);
+    return Results.Created($"/api/users/{newUser.Id}", newUser);
+});
+
+// PUT /api/users/{id}
+app.MapPut("/api/users/{id}", (int id, [FromBody] AdminUser user) =>
+{
+    if (!users.ContainsKey(id))
+        return Results.NotFound();
+
+    var updatedUser = user with { Id = id };
+    users[id] = updatedUser;
+    return Results.Ok(updatedUser);
+});
+
+// DELETE /api/users (bulk delete by IDs)
+app.MapDelete("/api/users", ([FromBody] List<int> ids) =>
+{
+    foreach (var id in ids)
+    {
+        users.TryRemove(id, out _);
+    }
+    return Results.NoContent();
+});
+
+// ── Order endpoints ──
+
+// POST /api/orders
+app.MapPost("/api/orders", ([FromBody] OrderRequest orderRequest) =>
+{
+    var total = orderRequest.Items.Sum(i => i.Price * i.Quantity);
+    var order = new Order(
+        Id: Interlocked.Increment(ref nextOrderId),
+        Items: orderRequest.Items,
+        Total: total,
+        Shipping: orderRequest.Shipping,
+        Status: "pending",
+        CreatedAt: DateTime.UtcNow
+    );
+    orders.TryAdd(order.Id, order);
+    return Results.Created($"/api/orders/{order.Id}", order);
+});
+
+// GET /api/orders
+app.MapGet("/api/orders", () =>
+    orders.Values.OrderByDescending(o => o.CreatedAt).ToList());
+
+// GET /api/orders/{id}
+app.MapGet("/api/orders/{id}", (int id) =>
+    orders.TryGetValue(id, out var order)
+        ? Results.Ok(order)
+        : Results.NotFound());
 
 app.Run();
