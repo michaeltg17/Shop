@@ -4,7 +4,10 @@
 ![Coverage total](./badges/coverage-total.svg)
 [![Mutation testing badge](https://img.shields.io/endpoint?style=plastic&url=https%3A%2F%2Fbadge-api.stryker-mutator.io%2Fgithub.com%2Fmichaeltg17%2FAngular%2Fmain)](https://dashboard.stryker-mutator.io/reports/github.com/michaeltg17/Angular/main)
 
-Built with local AI cyankiwi/Qwen3.6-27B-AWQ-BF16-INT4 running on 2x RTX 3090. Angular UI + .NET API. 
+Built with local AI.
+ - Model: cyankiwi/Qwen3.6-27B-AWQ-BF16-INT4 running on 2x RTX 3090
+ - "Manual" harness: cline extension on vscode
+ - Automated harness: OpenClaw
 
 ### API
 - .NET 10
