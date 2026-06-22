@@ -1,5 +1,5 @@
 # dev24-7 Worker State
 
 Status: STALE — heartbeat cleared (last activity too old)
-Cleared at: 2026-06-22 07:49:13 UTC
+Cleared at: Monday, June 22nd, 2026 - 10:12 AM (Europe/Madrid)
 Notes: Worker appears stuck; next run will start fresh.

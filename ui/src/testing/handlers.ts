@@ -1,11 +1,11 @@
 import { http, HttpResponse } from 'msw';
-import customersJson from './fixtures/customers.json';
+import usersJson from './fixtures/users.json';
 import productsJson from './fixtures/products.json';
 import { User } from '../app/features/users/user';
 import { Product } from '../app/features/products/product';
 import { setupWorker } from 'msw/browser';
 
-let users: User[] = [...customersJson];
+let users: User[] = [...usersJson];
 const products: Product[] = productsJson.map(p => ({
   id: p.id,
   title: p.title,
@@ -21,7 +21,7 @@ const mockOrders: { id: number; [key: string]: unknown }[] = [];
 let nextOrderId = 1;
 
 export const handlers = [
-  // --- Users (formerly customers) ---
+  // --- Users ---
   http.get('/api/users', () => {
     return HttpResponse.json(users);
   }),
