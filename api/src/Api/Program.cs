@@ -92,7 +92,7 @@ app.MapPost("/api/auth/register", ([FromBody] RegisterRequest request, IAuthServ
         return Results.Problem(
             detail: ex.Message,
             title: "Bad Request",
-            status: StatusCodes.Status400BadRequest,
+            statusCode: StatusCodes.Status400BadRequest,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         );
     }
@@ -105,7 +105,7 @@ app.MapPost("/api/auth/login", ([FromBody] LoginRequest request, IAuthService au
         return Results.Problem(
             detail: "Invalid credentials",
             title: "Unauthorized",
-            status: StatusCodes.Status401Unauthorized,
+            statusCode: StatusCodes.Status401Unauthorized,
             type: "https://tools.ietf.org/html/rfc7235#section-3.1"
         );
     return Results.Ok(result);
@@ -124,7 +124,7 @@ app.MapGet("/api/products/{id}", (int id) =>
         : Results.Problem(
             detail: $"Product with id {id} not found",
             title: "Not Found",
-            status: StatusCodes.Status404NotFound,
+            statusCode: StatusCodes.Status404NotFound,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         ))
     .WithName("GetProduct");
@@ -144,7 +144,7 @@ app.MapPut("/api/products/{id}", (int id, [FromBody] Product product) =>
         return Results.Problem(
             detail: $"Product with id {id} not found",
             title: "Not Found",
-            status: StatusCodes.Status404NotFound,
+            statusCode: StatusCodes.Status404NotFound,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         );
 
@@ -160,7 +160,7 @@ app.MapDelete("/api/products/{id}", (int id) =>
         return Results.Problem(
             detail: $"Product with id {id} not found",
             title: "Not Found",
-            status: StatusCodes.Status404NotFound,
+            statusCode: StatusCodes.Status404NotFound,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         );
 
@@ -188,7 +188,7 @@ app.MapPut("/api/users/{id}", (int id, [FromBody] AdminUser user) =>
         return Results.Problem(
             detail: $"User with id {id} not found",
             title: "Not Found",
-            status: StatusCodes.Status404NotFound,
+            statusCode: StatusCodes.Status404NotFound,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         );
 
@@ -236,7 +236,7 @@ app.MapGet("/api/orders/{id}", (int id) =>
         : Results.Problem(
             detail: $"Order with id {id} not found",
             title: "Not Found",
-            status: StatusCodes.Status404NotFound,
+            statusCode: StatusCodes.Status404NotFound,
             type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
         ));
 
