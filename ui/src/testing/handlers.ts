@@ -1,11 +1,11 @@
 import { http, HttpResponse } from 'msw';
 import customersJson from './fixtures/customers.json';
 import productsJson from './fixtures/products.json';
-import { Customer } from '../app/features/users/user';
+import { User } from '../app/features/users/user';
 import { Product } from '../app/features/products/product';
 import { setupWorker } from 'msw/browser';
 
-let customers: Customer[] = [...customersJson];
+let customers: User[] = [...customersJson];
 const products: Product[] = productsJson.map(p => ({
   id: p.id,
   title: p.title,
@@ -27,7 +27,7 @@ export const handlers = [
   }),
 
   http.post('/api/customers', async ({ request }) => {
-    const customer = (await request.json()) as Customer;
+    const customer = (await request.json()) as User;
     const maxId = customers.reduce((m, c) => Math.max(m, c.id), 0);
 
     const created = { ...customer, id: maxId + 1 };
@@ -37,7 +37,7 @@ export const handlers = [
   }),
 
   http.put('/api/customers/:id', async ({ request, params }) => {
-    const updated = (await request.json()) as Customer;
+    const updated = (await request.json()) as User;
     const id = Number(params['id']);
 
     customers = customers.map(c => (c.id === id ? updated : c));

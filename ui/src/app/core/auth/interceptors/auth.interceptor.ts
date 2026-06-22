@@ -1,5 +1,6 @@
-import { HttpEventHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 @Injectable({
@@ -8,7 +9,7 @@ import { AuthService } from '../services/auth.service';
 export class AuthInterceptor implements HttpInterceptor {
   private readonly authService = inject(AuthService);
 
-  intercept(req: HttpRequest<unknown>, next: HttpEventHandler<HttpRequest<unknown>>): unknown {
+  intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
 
     if (token) {
