@@ -1,5 +1,9 @@
 # dev24-7 Worker State
 
-Status: STALE — heartbeat cleared (last activity too old)
-Cleared at: 2026-06-23 06:27:06 UTC
-Notes: Worker appears stuck; next run will start fresh.
+Status: Waiting for CI
+Task: #124 feat: add product detail page with images, description, reviews
+Branch: feature/gh-124-product-detail-page
+PR: #126
+Last commit: df8bf8b fix(product-detail-page): proper jest test isolation and assertions
+CI: pushed fix, waiting for results
+Started: 2026-06-23 08:54 CEST

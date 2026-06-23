@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentRef, ComponentFixture, overrideComponent, TestBed } from '@angular/core/testing';
 import { ProductDetailPage } from './product-detail-page';
 import { ProductService } from '../../product.service';
 import { ReviewsService } from '../../reviews.service';
@@ -9,7 +9,7 @@ import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 describe('ProductDetailPage', () => {
   let component: ProductDetailPage;
@@ -42,6 +42,10 @@ describe('ProductDetailPage', () => {
     addReview: jest.fn(),
   };
 
+  const productServiceMock = {
+    loadProductById: jest.fn().mockReturnValue(of(mockProduct)),
+  };
+
   beforeEach(async () => {
     TestBed.resetTestingModule();
 
@@ -53,6 +57,8 @@ describe('ProductDetailPage', () => {
       open: jest.fn(),
     };
 
+    productServiceMock.loadProductById.mockReturnValue(of(mockProduct));
+
     await TestBed.configureTestingModule({
       imports: [ProductDetailPage],
       providers: [
@@ -60,9 +66,7 @@ describe('ProductDetailPage', () => {
         provideHttpClientTesting(),
         {
           provide: ProductService,
-          useValue: {
-            loadProductById: jest.fn().mockReturnValue(of(mockProduct)),
-          },
+          useValue: productServiceMock,
         },
         { provide: ReviewsService, useValue: mockReviewsService },
         { provide: CartService, useValue: cartService },
@@ -70,6 +74,8 @@ describe('ProductDetailPage', () => {
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Router, useValue: mockRouter },
       ],
+    }).overrideComponent(ProductDetailPage, {
+      addProviders: [{ provide: MatSnackBar, useValue: snackBar }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ProductDetailPage);
@@ -81,10 +87,12 @@ describe('ProductDetailPage', () => {
   });
 
   it('should load product on init', () => {
-    component.ngOnInit();
-    // loading is set to true synchronously in ngOnInit before the async HTTP call
-    expect(component.loading()).toBe(true);
+    // ProductService.loadProductById is called with correct ID from route
+    expect(productServiceMock.loadProductById).toHaveBeenCalledWith(1);
+    // After synchronous resolution of of(), loading is false and product is set
+    expect(component.loading()).toBe(false);
     expect(component.error()).toBeNull();
+    expect(component.product()).toBeTruthy();
   });
 
   it('should navigate back when goBack is called', () => {
@@ -100,7 +108,11 @@ describe('ProductDetailPage', () => {
   });
 
   it('should not add to cart if no product', () => {
-    // product signal starts as null, no need to set it
+    // Reset mocks for clean test isolation
+    cartService.addToCart.mockClear();
+    snackBar.open.mockClear();
+    // Set product to null explicitly
+    component.product.set(null);
     component.addToCart();
     expect(cartService.addToCart).not.toHaveBeenCalled();
     expect(snackBar.open).not.toHaveBeenCalled();
