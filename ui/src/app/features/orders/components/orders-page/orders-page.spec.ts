@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { OrdersPage } from './orders-page';
@@ -73,7 +73,7 @@ describe('OrdersPage', () => {
     expect(component.loading()).toBeFalse();
   });
 
-  it('should display empty state when no orders', fakeAsync(() => {
+  it('should display empty state when no orders', () => {
     fixture.ngOnInit();
     const req = httpMock.expectOne('api/orders');
     req.flush([]);
@@ -81,7 +81,7 @@ describe('OrdersPage', () => {
 
     const nativeEl = fixture.nativeElement;
     expect(nativeEl.querySelector('.empty-state')).toBeTruthy();
-  }));
+  });
 
   it('should format currency correctly', () => {
     expect(component.formatCurrency(10)).toBe('$10.00');
@@ -101,5 +101,36 @@ describe('OrdersPage', () => {
     expect(component.getStatusColor('completed')).toBe('#4caf50');
     expect(component.getStatusColor('cancelled')).toBe('#f44336');
     expect(component.getStatusColor('unknown')).toBe('#9e9e9e');
+  });
+
+  it('should retry loading orders after error', () => {
+    // First load fails
+    fixture.ngOnInit();
+    const req1 = httpMock.expectOne('api/orders');
+    req1.flush({ error: 'Not found' }, { status: 500, statusText: 'Internal Server Error' });
+    fixture.detectChanges();
+    expect(component.error()).toBeTruthy();
+
+    // Click retry
+    component.loadOrders();
+    expect(component.loading()).toBeTrue();
+    expect(component.error()).toBeNull();
+
+    const req2 = httpMock.expectOne('api/orders');
+    req2.flush(mockOrders);
+    fixture.detectChanges();
+
+    expect(component.orders().length).toBe(2);
+    expect(component.loading()).toBeFalse();
+    expect(component.error()).toBeNull();
+  });
+
+  it('should format currency with negative values', () => {
+    expect(component.formatCurrency(-10)).toBe('$-10.00');
+  });
+
+  it('should handle status case insensitively', () => {
+    expect(component.getStatusColor('PENDING')).toBe('#ff9800');
+    expect(component.getStatusColor('Completed')).toBe('#4caf50');
   });
 });

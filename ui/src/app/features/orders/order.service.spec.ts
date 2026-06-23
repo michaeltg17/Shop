@@ -64,6 +64,21 @@ describe('OrderService', () => {
       const req = httpMock.expectOne('api/orders');
       req.flush([]);
     });
+
+    it('should handle server error', () => {
+      service.getOrders().subscribe({
+        next: () => fail('should have errored'),
+        error: err => {
+          expect(err.status).toBe(500);
+        },
+      });
+
+      const req = httpMock.expectOne('api/orders');
+      req.flush(
+        { error: 'Internal server error' },
+        { status: 500, statusText: 'Internal Server Error' }
+      );
+    });
   });
 
   describe('getOrder', () => {
@@ -87,10 +102,7 @@ describe('OrderService', () => {
       });
 
       const req = httpMock.expectOne('api/orders/999');
-      req.flush(
-        { error: 'Not found' },
-        { status: 404, statusText: 'Not Found' }
-      );
+      req.flush({ error: 'Not found' }, { status: 404, statusText: 'Not Found' });
     });
   });
 
