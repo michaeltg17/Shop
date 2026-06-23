@@ -14,7 +14,18 @@ import { CartService } from '../../../cart/cart.service';
 describe('ProductDetailPage', () => {
   let component: ProductDetailPage;
   let fixture: ComponentFixture<ProductDetailPage>;
-  let cartService: { addToCart: jest.Mock; removeFromCart: jest.Mock; updateQuantity: jest.Mock; toggleItemSelection: jest.Mock; selectAllItems: jest.Mock; clearCart: jest.Mock; getSubtotal: jest.Mock; getSelectedItems: jest.Mock; getAllItems: jest.Mock; placeOrder: jest.Mock };
+  let cartService: {
+    addToCart: jest.Mock;
+    removeFromCart: jest.Mock;
+    updateQuantity: jest.Mock;
+    toggleItemSelection: jest.Mock;
+    selectAllItems: jest.Mock;
+    clearCart: jest.Mock;
+    getSubtotal: jest.Mock;
+    getSelectedItems: jest.Mock;
+    getAllItems: jest.Mock;
+    placeOrder: jest.Mock;
+  };
   let snackBar: { open: jest.Mock };
 
   const mockProduct: Product = {
@@ -211,7 +222,9 @@ describe('ProductDetailPage', () => {
     component.submitReview();
 
     expect(mockReviewsService.addReview).not.toHaveBeenCalled();
-    expect(snackBar.open).toHaveBeenCalledWith('Please fill in all review fields', 'Close', { duration: 3000 });
+    expect(snackBar.open).toHaveBeenCalledWith('Please fill in all review fields', 'Close', {
+      duration: 3000,
+    });
   });
 
   it('should get stars for a rating', () => {
