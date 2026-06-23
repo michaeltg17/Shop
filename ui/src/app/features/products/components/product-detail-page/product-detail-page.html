@@ -92,11 +92,11 @@
     <mat-card class="review-form-card">
       <h3>Write a Review</h3>
       <div class="form-group">
-        <label id="rating-label">Rating</label>
+        <span class="rating-label-text">Rating</span>
         <div
           class="rating-input"
           role="radiogroup"
-          aria-labelledby="rating-label"
+          aria-label="Rating"
           (click)="newRating() < 5 ? newRating.update(r => r + 1) : null"
           (keydown.enter)="newRating() < 5 ? newRating.update(r => r + 1) : null"
           (keydown.space)="newRating() < 5 ? newRating.update(r => r + 1) : null"
