@@ -51,7 +51,7 @@ describe('OrdersPage', () => {
   });
 
   it('should load orders on init', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
 
     const req = httpMock.expectOne('api/orders');
     expect(req.request.method).toBe('GET');
@@ -63,7 +63,7 @@ describe('OrdersPage', () => {
   });
 
   it('should set error state on load failure', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
 
     const req = httpMock.expectOne('api/orders');
     req.flush({ error: 'Not found' }, { status: 500, statusText: 'Internal Server Error' });
@@ -74,7 +74,7 @@ describe('OrdersPage', () => {
   });
 
   it('should display empty state when no orders', () => {
-    component.ngOnInit();
+    fixture.detectChanges();
     const req = httpMock.expectOne('api/orders');
     req.flush([]);
     fixture.detectChanges();
@@ -105,7 +105,7 @@ describe('OrdersPage', () => {
 
   it('should retry loading orders after error', () => {
     // First load fails
-    component.ngOnInit();
+    fixture.detectChanges();
     const req1 = httpMock.expectOne('api/orders');
     req1.flush({ error: 'Not found' }, { status: 500, statusText: 'Internal Server Error' });
     fixture.detectChanges();
