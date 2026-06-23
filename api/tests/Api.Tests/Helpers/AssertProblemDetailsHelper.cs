@@ -1,9 +1,8 @@
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
-using Xunit;
 
-namespace Api.Tests;
+namespace Api.Tests.Helpers;
 
 public static class AssertProblemDetailsHelper
 {

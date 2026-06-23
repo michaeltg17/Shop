@@ -1,4 +1,5 @@
 using Api.Data;
+using Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -9,9 +10,10 @@ public static class GetProductEndpoint
 {
     public static IEndpointRouteBuilder MapGetProductEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/products/{id}", (int id, [FromServices] ProductStore store) =>
+        app.MapGet("/api/products/{id}", async (int id, [FromServices] AppDbContext context) =>
         {
-            if (!store.TryGet(id, out var product))
+            var product = await context.Products.FindAsync(id);
+            if (product == null)
                 return Results.Problem(
                     detail: $"Product with id {id} not found",
                     title: "Not Found",

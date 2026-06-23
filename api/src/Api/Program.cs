@@ -7,6 +7,7 @@ using Api.Endpoints.UsersEndpoints;
 using Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,11 +18,12 @@ if (builder.Environment.IsDevelopment())
     builder.Services.AddSwaggerGen();
 }
 
+// DB
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 // Register services
-builder.Services.AddSingleton<IAuthService, AuthService>();
-builder.Services.AddSingleton<ProductStore>();
-builder.Services.AddSingleton<UserStore>();
-builder.Services.AddSingleton<OrderStore>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // JWT Authentication
 var jwtSecret = builder.Configuration["Jwt:Secret"]
@@ -45,6 +47,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+app.InitializeDb();
 
 if (app.Environment.IsDevelopment())
 {

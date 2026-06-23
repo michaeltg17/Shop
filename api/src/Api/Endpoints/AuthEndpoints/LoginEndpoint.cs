@@ -12,7 +12,7 @@ public static class LoginEndpoint
     {
         app.MapPost("/api/auth/login", async ([FromBody] LoginRequest req, [FromServices] IAuthService authService) =>
         {
-            var result = authService.Login(req);
+            var result = await authService.LoginAsync(req);
             if (result == null)
                 return Results.Problem(
                     detail: "Invalid credentials",

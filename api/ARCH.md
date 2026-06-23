@@ -2,38 +2,56 @@
 
 ## Overview
 
-Minimal .NET 10 Minimal APIs project — no controllers, no layered architecture, no EF, no DI-heavy infrastructure. Everything lives in `Program.cs` with in-memory storage. Auth is handled by a registered `IAuthService` singleton.
+.NET 10 Minimal APIs project with EF Core + PostgreSQL. Auth is handled by a scoped `IAuthService` service. All data is persisted in PostgreSQL via EF Core migrations.
 
 ## Structure
 
 ```
 api/
 ├── src/Api/
-│   ├── Program.cs            # All endpoints + middleware + in-memory stores
-│   ├── Models/               # C# records (Product, Order, User, AdminUser, Auth)
-│   └── Services/
-│       └── AuthService.cs    # JWT auth + bcrypt password hashing + user store
+│   ├── Program.cs            # App setup, DbContext registration, auth config
+│   ├── Models/               # C# POCOs (Product, Order, User, AdminUser, Auth)
+│   ├── Services/
+│   │   └── AuthService.cs    # JWT auth + bcrypt password hashing + EF Core queries
+│   └── Data/
+│       ├── AppDbContext.cs      # EF Core DbContext + entity configuration
+│       ├── DatabaseSeeder.cs    # Seed data on first startup
+│       ├── DbExtensions.cs      # Auto-migrate + seed helper
+│       └── Migrations/          # EF Core migrations
 └── tests/Api.Tests/
-    ├── UsersEndpointsTests.cs
-    ├── ProductsEndpointsTests.cs
-    └── OrdersEndpointsTests.cs
+    ├── Tests/
+    │   ├── UsersEndpointsTests.cs
+    │   ├── ProductsEndpointsTests.cs
+    │   ├── OrdersEndpointsTests.cs
+    │   └── AuthEndpointsTests.cs
+    └── Helpers/
+        └── AssertProblemDetailsHelper.cs
 ```
 
 ## Key Design Decisions
 
-### In-Memory Storage
+### PostgreSQL Database
 
-All data (products, users, orders, auth users) is stored in `ConcurrentDictionary` instances created in `Program.cs`. Seed data is populated at startup. This is intentional — the API is lightweight and stateless per process. No database dependency.
+All data (products, users, orders, auth users) is stored in PostgreSQL via EF Core. Seed data is populated on first startup via `DatabaseSeeder`. Migrations are committed to git and auto-applied on startup.
+
+**Configuration:** `ConnectionStrings:DefaultConnection` in appsettings.json
+
+### EF Core
+
+- DbContext is registered as scoped (single instance per request).
+- All `DbSets` are exposed directly on `AppDbContext`.
+- Migrations are applied automatically on startup via `app.InitializeDb()`.
+- Entity configurations use Fluent API in `OnModelCreating`.
 
 ### Minimal APIs
 
-All routes are defined inline via `app.Map*()` calls in `Program.cs`. Auth-protected routes use `.RequireAuthorization()`. No controllers, no middleware pipelines beyond auth/swagger.
+All routes are defined via `app.Map*()` calls. Auth-protected routes use `.RequireAuthorization()`. No controllers, no middleware pipelines beyond auth/swagger.
 
 ### Authentication
 
-- **Users** (JWT): `AuthService` manages a `ConcurrentDictionary<string, User>` store. Registration enforces unique username/email, min 8-char password (bcrypt hashed). Login returns a JWT (HMAC-SHA256, configurable expiry via `Jwt:ExpiryHours`).
+- **Users** (JWT): `AuthService` manages users via `AppDbContext`. Registration enforces unique username/email, min 8-char password (bcrypt hashed). Login returns a JWT (HMAC-SHA256, configurable expiry via `Jwt:ExpiryHours`).
 - **JWT Validation**: Configured via `Jwt:Secret` in app config. Issuer: `shop-api`, audience: `shop`.
-- **Admin Users**: Separate `ConcurrentDictionary<int, AdminUser>` in `Program.cs` — no auth required for admin endpoints (currently unprotected).
+- **Admin Users**: Separate table in PostgreSQL — no auth required for admin endpoints (currently unprotected).
 
 ### Configuration
 
@@ -41,6 +59,7 @@ All routes are defined inline via `app.Map*()` calls in `Program.cs`. Auth-prote
 |-----|----------|---------|-------------|
 | `Jwt:Secret` | Yes | — | HMAC-SHA256 signing key |
 | `Jwt:ExpiryHours` | No | `24` | Token expiry in hours |
+| `ConnectionStrings:DefaultConnection` | Yes | — | PostgreSQL connection string |
 
 ### Error Responses — ProblemDetails
 
@@ -88,7 +107,30 @@ return Results.Problem(
 |---------|---------|
 | `BCrypt.Net-Next` | Password hashing |
 | `Microsoft.AspNetCore.Authentication.JwtBearer` | JWT middleware |
+| `Microsoft.EntityFrameworkCore` | EF Core ORM |
+| `Microsoft.EntityFrameworkCore.Tools` | EF Core CLI |
+| `Npgsql.EntityFrameworkCore.PostgreSQL` | PostgreSQL provider |
 | `Swashbuckle.AspNetCore` | Swagger (dev only) |
+
+## Database Schema
+
+### Tables
+
+| Table | Primary Key | Foreign Keys |
+|---|---|---|
+| Products | Id | — |
+| Users | Id | — |
+| AdminUsers | Id | — |
+| Orders | Id | — |
+| OrderItems | Id | OrderId → Orders |
+
+### Unique Constraints
+
+| Table | Column |
+|---|---|
+| Users | Username |
+| Users | Email |
+| Products | Category (indexed) |
 
 ## Endpoints
 
@@ -143,7 +185,7 @@ return Results.Problem(
 
 **Why:**
 
-The API is small and flat. The value of unit tests with mocks is near-zero when the entire app fits in one file and services have trivial logic. Integration tests exercise the full pipeline — routing, auth middleware, JSON serialization, endpoint handlers, and in-memory state — catching real bugs mocks can't.
+The API is small and flat. The value of unit tests with mocks is near-zero when the entire app fits in one file and services have trivial logic. Integration tests exercise the full pipeline — routing, auth middleware, JSON serialization, endpoint handlers, and database operations — catching real bugs mocks can't.
 
 **Test structure:**
 
@@ -160,7 +202,15 @@ The API is small and flat. The value of unit tests with mocks is near-zero when 
 
 **Adding tests:**
 
-1. Create a new `*Tests.cs` file in `tests/Api.Tests/`
+1. Create a new `*Tests.cs` file in `tests/Api.Tests/Tests/`
 2. Use the same pattern: `WebApplicationFactory<Program>` + `HttpClient` + FluentAssertions
 3. For auth-required endpoints: register + login via real endpoints to get a JWT
 4. Test both success and error paths (not found, unauthorized, bad request)
+
+## Migrations
+
+New migrations are added via:
+
+```bash
+dotnet ef migrations add <MigrationName> --project src/Api/Api.csproj --output-dir Data/Migrations
+```

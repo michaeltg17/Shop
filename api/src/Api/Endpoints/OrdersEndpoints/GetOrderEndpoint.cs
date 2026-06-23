@@ -3,6 +3,7 @@ using Api.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Endpoints.OrdersEndpoints;
 
@@ -10,9 +11,13 @@ public static class GetOrderEndpoint
 {
     public static IEndpointRouteBuilder MapGetOrderEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/orders/{id}", (int id, [FromServices] OrderStore store) =>
+        app.MapGet("/api/orders/{id}", async (int id, [FromServices] AppDbContext context) =>
         {
-            if (!store.TryGet(id, out var order))
+            var order = await context.Orders
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync(o => o.Id == id);
+
+            if (order == null)
                 return Results.Problem(
                     detail: $"Order with id {id} not found",
                     title: "Not Found",

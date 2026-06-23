@@ -1,28 +1,29 @@
-using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Api.Data;
 using Api.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Services;
 
 public interface IAuthService
 {
-    AuthResponse Register(RegisterRequest request);
-    AuthResponse? Login(LoginRequest request);
-    User? GetUserByUsername(string username);
+    Task<AuthResponse> RegisterAsync(RegisterRequest request);
+    Task<AuthResponse?> LoginAsync(LoginRequest request);
+    Task<User?> GetUserByUsernameAsync(string username);
 }
 
 public class AuthService : IAuthService
 {
-    private readonly ConcurrentDictionary<string, User> _users = new();
+    private readonly AppDbContext _context;
     private readonly string _jwtSecret;
     private readonly TimeSpan _tokenExpiry;
-    private int _nextUserId = 0;
 
-    public AuthService(IConfiguration configuration)
+    public AuthService(AppDbContext context, IConfiguration configuration)
     {
+        _context = context;
         _jwtSecret = configuration["Jwt:Secret"]
             ?? throw new InvalidOperationException("Jwt:Secret configuration is required");
         _tokenExpiry = TimeSpan.FromHours(
@@ -30,33 +31,41 @@ public class AuthService : IAuthService
         );
     }
 
-    public AuthResponse Register(RegisterRequest request)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
-        if (_users.ContainsKey(request.Username.ToLowerInvariant()))
+        if (await _context.Users.AnyAsync(u => u.Username == request.Username.ToLowerInvariant()))
             throw new InvalidOperationException("Username already taken");
 
         var emailKey = request.Email.ToLowerInvariant();
-        if (_users.Values.Any(u => u.Email == emailKey))
+        if (await _context.Users.AnyAsync(u => u.Email == emailKey))
             throw new InvalidOperationException("Email already registered");
 
         if (request.Password.Length < 8)
             throw new InvalidOperationException("Password must be at least 8 characters");
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        var id = Interlocked.Increment(ref _nextUserId);
-        var user = new User(id, request.Username, request.Email, passwordHash);
+        var user = new User
+        {
+            Username = request.Username,
+            Email = request.Email,
+            PasswordHash = passwordHash
+        };
 
-        _users.TryAdd(request.Username.ToLowerInvariant(), user);
+        await _context.Users.AddAsync(user);
+        await _context.SaveChangesAsync();
 
         var token = GenerateJwtToken(user);
         return new AuthResponse(token, user.Username, user.Email);
     }
 
-    public AuthResponse? Login(LoginRequest request)
+    public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
-        if (!_users.TryGetValue(request.Username.ToLowerInvariant(), out var u))
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Username == request.Username.ToLowerInvariant());
+
+        if (user == null)
             return null;
-        var user = u;
+
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return null;
 
@@ -64,8 +73,8 @@ public class AuthService : IAuthService
         return new AuthResponse(token, user.Username, user.Email);
     }
 
-    public User? GetUserByUsername(string username)
-        => _users.TryGetValue(username.ToLowerInvariant(), out var u) ? u : null;
+    public async Task<User?> GetUserByUsernameAsync(string username)
+        => await _context.Users.FirstOrDefaultAsync(u => u.Username == username.ToLowerInvariant());
 
     private string GenerateJwtToken(User user)
     {

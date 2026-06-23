@@ -10,7 +10,7 @@ public static class CreateProductEndpoint
 {
     public static IEndpointRouteBuilder MapCreateProductEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/products", (HttpContext ctx, [FromBody] Product product, [FromServices] ProductStore store) =>
+        app.MapPost("/api/products", async (HttpContext ctx, [FromBody] Product product, [FromServices] AppDbContext context) =>
         {
             if (!ctx.User.Identity!.IsAuthenticated)
                 return Results.Problem(
@@ -20,8 +20,9 @@ public static class CreateProductEndpoint
                     type: "https://tools.ietf.org/html/rfc7235#section-3.1"
                 );
 
-            var newProduct = store.Add(product);
-            return Results.CreatedAtRoute("GetProduct", new { id = newProduct.Id }, newProduct);
+            context.Products.Add(product);
+            await context.SaveChangesAsync();
+            return Results.Created($"/api/products/{product.Id}", product);
         });
 
         return app;

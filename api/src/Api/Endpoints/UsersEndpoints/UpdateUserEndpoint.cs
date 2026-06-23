@@ -10,9 +10,10 @@ public static class UpdateUserEndpoint
 {
     public static IEndpointRouteBuilder MapUpdateUserEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPut("/api/users/{id}", (int id, [FromBody] AdminUser user, [FromServices] UserStore store) =>
+        app.MapPut("/api/users/{id}", async (int id, [FromBody] AdminUser user, [FromServices] AppDbContext context) =>
         {
-            if (!store.Update(id, user))
+            var existing = await context.AdminUsers.FindAsync(id);
+            if (existing == null)
                 return Results.Problem(
                     detail: $"User with id {id} not found",
                     title: "Not Found",
@@ -20,7 +21,14 @@ public static class UpdateUserEndpoint
                     type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
                 );
 
-            return Results.Ok(user with { Id = id });
+            existing.FirstName = user.FirstName;
+            existing.LastName = user.LastName;
+            existing.Email = user.Email;
+            existing.PhoneNumber = user.PhoneNumber;
+            existing.IsActive = user.IsActive;
+            await context.SaveChangesAsync();
+
+            return Results.Ok(existing);
         });
 
         return app;

@@ -10,7 +10,7 @@ public static class UpdateProductEndpoint
 {
     public static IEndpointRouteBuilder MapUpdateProductEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPut("/api/products/{id}", (HttpContext ctx, int id, [FromBody] Product product, [FromServices] ProductStore store) =>
+        app.MapPut("/api/products/{id}", async (HttpContext ctx, int id, [FromBody] Product product, [FromServices] AppDbContext context) =>
         {
             if (!ctx.User.Identity!.IsAuthenticated)
                 return Results.Problem(
@@ -20,7 +20,8 @@ public static class UpdateProductEndpoint
                     type: "https://tools.ietf.org/html/rfc7235#section-3.1"
                 );
 
-            if (!store.Update(id, product))
+            var existing = await context.Products.FindAsync(id);
+            if (existing == null)
                 return Results.Problem(
                     detail: $"Product with id {id} not found",
                     title: "Not Found",
@@ -28,7 +29,18 @@ public static class UpdateProductEndpoint
                     type: "https://tools.ietf.org/html/rfc7231#section-6.5.4"
                 );
 
-            return Results.Ok(product with { Id = id });
+            existing.Name = product.Name;
+            existing.Description = product.Description;
+            existing.Price = product.Price;
+            existing.Category = product.Category;
+            existing.Image = product.Image;
+            if (product.Rating != null)
+            {
+                existing.Rating = product.Rating;
+            }
+            await context.SaveChangesAsync();
+
+            return Results.Ok(existing);
         });
 
         return app;

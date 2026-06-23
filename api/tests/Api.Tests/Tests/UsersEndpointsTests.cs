@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Api.Models;
+using Api.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
@@ -33,7 +34,7 @@ public class UsersEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task CreateUser_ReturnsCreatedUser()
     {
-        var user = new AdminUser(0, "Alice", "Smith", "alice@shop.com", "+1-555-0200", true);
+        var user = new AdminUser { FirstName = "Alice", LastName = "Smith", Email = "alice@shop.com", PhoneNumber = "+1-555-0200", IsActive = true };
         var content = new StringContent(
             JsonSerializer.Serialize(user),
             Encoding.UTF8,
@@ -51,7 +52,7 @@ public class UsersEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task UpdateUser_WhenExists_ReturnsUpdatedUser()
     {
-        var user = new AdminUser(1, "Michael", "Updated", "michael@updated.com", "+1-555-9999", true);
+        var user = new AdminUser { Id = 1, FirstName = "Michael", LastName = "Updated", Email = "michael@updated.com", PhoneNumber = "+1-555-9999", IsActive = true };
         var content = new StringContent(
             JsonSerializer.Serialize(user),
             Encoding.UTF8,
@@ -69,7 +70,7 @@ public class UsersEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task UpdateUser_WhenNotExists_ReturnsProblemDetails404()
     {
-        var user = new AdminUser(999, "Nobody", "Here", "nobody@nowhere.com", "", false);
+        var user = new AdminUser { FirstName = "Nobody", LastName = "Here", Email = "nobody@nowhere.com", PhoneNumber = "", IsActive = false };
         var content = new StringContent(
             JsonSerializer.Serialize(user),
             Encoding.UTF8,
@@ -99,7 +100,7 @@ public class UsersEndpointsTests : IAsyncDisposable
         var getUsersResponse = await _client.GetAsync("/api/users");
         var remainingUsers = await getUsersResponse.Content.ReadFromJsonAsync<List<AdminUser>>();
         remainingUsers!.Should().HaveCount(1);
-        remainingUsers![0].Id.Should().Be(3);
+        remainingUsers[0].Id.Should().Be(3);
     }
 
     public async ValueTask DisposeAsync()

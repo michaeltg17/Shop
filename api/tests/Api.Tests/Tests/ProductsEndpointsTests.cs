@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Api.Models;
+using Api.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
@@ -13,8 +14,6 @@ public class ProductsEndpointsTests : IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
-    private string _authToken = "";
-    private bool _authenticated = false;
 
     public ProductsEndpointsTests()
     {
@@ -22,34 +21,30 @@ public class ProductsEndpointsTests : IAsyncDisposable
         _client = _factory.CreateClient();
     }
 
-    private void EnsureAuthenticated()
+    private async Task<string> GetAuthTokenAsync()
     {
-        if (_authenticated) return;
-
-        // Register a fresh user in this factory instance
-        var registerReq = new { Username = "testuser", Email = "test@shop.com", Password = "password123" };
-        var registerContent = new StringContent(
+        var registerReq = new { Username = "authtest", Email = "authtest@shop.com", Password = "password123" };
+        var content = new StringContent(
             JsonSerializer.Serialize(registerReq),
             Encoding.UTF8,
             "application/json");
-        _client.PostAsync("/api/auth/register", registerContent).GetAwaiter().GetResult();
+        await _client.PostAsync("/api/auth/register", content);
 
-        // Login
-        var loginReq = new { Username = "testuser", Password = "password123" };
+        var loginReq = new { Username = "authtest", Password = "password123" };
         var loginContent = new StringContent(
             JsonSerializer.Serialize(loginReq),
             Encoding.UTF8,
             "application/json");
-        var loginResponse = _client.PostAsync("/api/auth/login", loginContent).GetAwaiter().GetResult();
-        var loginBody = loginResponse.Content.ReadFromJsonAsync<AuthResponse>().GetAwaiter().GetResult();
-        _authToken = loginBody!.Token;
-        _authenticated = true;
+        var loginResponse = await _client.PostAsync("/api/auth/login", loginContent);
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>();
+        return loginBody!.Token;
     }
 
-    private HttpClient CreateAuthClient()
+    private async Task<HttpClient> CreateAuthClientAsync()
     {
         var c = _factory.CreateClient();
-        c.DefaultRequestHeaders.Add("Authorization", $"Bearer {_authToken}");
+        var token = await GetAuthTokenAsync();
+        c.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
         return c;
     }
 
@@ -85,9 +80,8 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task CreateProduct_WithAuth_ReturnsCreatedProduct()
     {
-        EnsureAuthenticated();
-        var authClient = CreateAuthClient();
-        var product = new Product(0, "Monitor", "4K Display", 399.99m);
+        var authClient = await CreateAuthClientAsync();
+        var product = new Product { Name = "Monitor", Description = "4K Display", Price = 399.99m };
         var content = new StringContent(
             JsonSerializer.Serialize(product),
             Encoding.UTF8,
@@ -106,7 +100,7 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task CreateProduct_WithoutAuth_ReturnsProblemDetails401()
     {
-        var product = new Product(0, "Monitor", "4K Display", 399.99m);
+        var product = new Product { Name = "Monitor", Description = "4K Display", Price = 399.99m };
         var content = new StringContent(
             JsonSerializer.Serialize(product),
             Encoding.UTF8,
@@ -120,9 +114,8 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task UpdateProduct_WithAuth_WhenExists_ReturnsUpdatedProduct()
     {
-        EnsureAuthenticated();
-        var authClient = CreateAuthClient();
-        var product = new Product(0, "Updated Laptop", "Updated description", 1099.99m);
+        var authClient = await CreateAuthClientAsync();
+        var product = new Product { Name = "Updated Laptop", Description = "Updated description", Price = 1099.99m };
         var content = new StringContent(
             JsonSerializer.Serialize(product),
             Encoding.UTF8,
@@ -141,7 +134,7 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task UpdateProduct_WithoutAuth_ReturnsProblemDetails401()
     {
-        var product = new Product(0, "New Product", "Description", 9.99m);
+        var product = new Product { Name = "New Product", Description = "Description", Price = 9.99m };
         var content = new StringContent(
             JsonSerializer.Serialize(product),
             Encoding.UTF8,
@@ -155,8 +148,7 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task DeleteProduct_WithAuth_WhenExists_ReturnsNoContent()
     {
-        EnsureAuthenticated();
-        var authClient = CreateAuthClient();
+        var authClient = await CreateAuthClientAsync();
         var response = await authClient.DeleteAsync("/api/products/2");
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -174,9 +166,8 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task UpdateProduct_NotFound_ReturnsProblemDetails404()
     {
-        EnsureAuthenticated();
-        var authClient = CreateAuthClient();
-        var product = new Product(0, "Monitor", "4K Display", 399.99m);
+        var authClient = await CreateAuthClientAsync();
+        var product = new Product { Name = "Monitor", Description = "4K Display", Price = 399.99m };
         var content = new StringContent(
             JsonSerializer.Serialize(product),
             Encoding.UTF8,
@@ -191,8 +182,7 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task DeleteProduct_NotFound_ReturnsProblemDetails404()
     {
-        EnsureAuthenticated();
-        var authClient = CreateAuthClient();
+        var authClient = await CreateAuthClientAsync();
         var response = await authClient.DeleteAsync("/api/products/999");
 
         await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound);

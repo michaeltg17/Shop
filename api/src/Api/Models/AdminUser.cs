@@ -1,10 +1,11 @@
 namespace Api.Models;
 
-public record AdminUser(
-    int Id,
-    string FirstName,
-    string LastName,
-    string Email,
-    string PhoneNumber,
-    bool IsActive
-);
+public class AdminUser
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; } = "";
+    public string LastName { get; set; } = "";
+    public string Email { get; set; } = "";
+    public string PhoneNumber { get; set; } = "";
+    public bool IsActive { get; set; }
+}

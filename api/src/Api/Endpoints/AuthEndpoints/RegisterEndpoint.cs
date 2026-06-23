@@ -14,7 +14,7 @@ public static class RegisterEndpoint
         {
             try
             {
-                var result = authService.Register(req);
+                var result = await authService.RegisterAsync(req);
                 return Results.Ok(result);
             }
             catch (InvalidOperationException ex)
