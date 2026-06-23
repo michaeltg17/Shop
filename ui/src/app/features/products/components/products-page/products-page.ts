@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { ProductService } from '../../product.service';
 import { Product } from '../../product';
 import { CommonModule } from '@angular/common';

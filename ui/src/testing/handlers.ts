@@ -68,7 +68,7 @@ export const handlers = [
   }),
 
   // --- Product Reviews ---
-  http.get('/api/products/:id/reviews', ({ params }) => {
+  http.get('/api/products/:id/reviews', () => {
     return HttpResponse.json([]);
   }),
 
