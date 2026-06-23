@@ -32,20 +32,20 @@ describe('ProductDetailPage', () => {
   };
 
   const mockRouter = {
-    navigate: jasmine.createSpy('navigate'),
+    navigate: jest.fn().mockResolvedValue(true),
   };
 
   const mockReviewsService = {
-    getProductReviews: jasmine.createSpy('getProductReviews').and.returnValue([]),
-    addReview: jasmine.createSpy('addReview'),
+    getProductReviews: jest.fn().mockReturnValue([]),
+    addReview: jest.fn(),
   };
 
   const mockCartService = {
-    addToCart: jasmine.createSpy('addToCart'),
+    addToCart: jest.fn(),
   };
 
   const mockSnackBar = {
-    open: jasmine.createSpy('open'),
+    open: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -57,7 +57,7 @@ describe('ProductDetailPage', () => {
         {
           provide: ProductService,
           useValue: {
-            loadProductById: jasmine.createSpy('loadProductById').and.returnValue(of(mockProduct)),
+            loadProductById: jest.fn().mockReturnValue(of(mockProduct)),
           },
         },
         { provide: ReviewsService, useValue: mockReviewsService },
