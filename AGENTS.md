@@ -17,9 +17,41 @@ shop/
 
 ## CI/CD
 
-- CI: GitHub Actions - ci-api.yml (.NET), ci-ui.yml (Angular)
-- CD: Ubuntu Server + Docker
-- Both projects use Docker containers for CI
+### CI (.github/workflows/)
+
+- `ci-api.yml` — runs on push/PR to `main` when `api/**` changes, or `workflow_dispatch`
+  - Runs CI in Docker via `docker build -f Dockerfile.ci` + `docker compose -f docker-compose.ci.yml run --rm ci`
+  - CI container: .NET 10 SDK, runs build + integration tests against a PostgreSQL sidecar
+  - On push to `main`: publishes `ghcr.io/michaeltg17/shop-api:<sha>` and `ghcr.io/michaeltg17/shop-api:latest`
+  - On PR: validates production Docker image builds (no push)
+  - Artifacts: `api-test-results` (30-day retention)
+
+- `ci-ui.yml` — runs on push/PR to `main` when `ui/**` changes, or `workflow_dispatch`
+  - Runs CI in Docker via `docker build -f Dockerfile.ci` + `docker compose -f docker-compose.ci.yml run --rm ci`
+  - CI container: Playwright image, runs prettier, lint, unit/E2E/mutation tests, SonarCloud
+  - On push to `main`: publishes `ghcr.io/michaeltg17/shop-ui:<sha>` and `ghcr.io/michaeltg17/shop-ui:latest`
+  - On PR: validates production Docker image builds (no push)
+  - Artifacts: `ui-coverage-reports` (30-day retention)
+  - Requires `SONAR_TOKEN` GH secret (skipped if absent)
+
+### CD (.github/workflows/cd.yml)
+
+- Triggers when both `ci-api` and `ci-ui` succeed on `main` (`workflow_run` event)
+- Sequential webhook deployment to `statikk.mooo.com/deploy-shop`: dev → qa → prod
+- Payload: `{"environment":"dev|qa|prod","commit_sha":"<sha>"}`
+- Deploy server resolves images internally from GHCR (`shop-api:<sha>`, `shop-ui:<sha>`)
+
+### Local CI
+
+- API:  `docker compose -f docker-compose.ci.yml run --rm ci` (from `api/`)
+- UI:   `docker compose -f docker-compose.ci.yml run --rm ci` (from `ui/`)
+
+### Registry
+
+- GitHub Container Registry (GHCR)
+- `ghcr.io/michaeltg17/shop-api` — two tags per push: `:<sha>` (pinned deployable version) and `:latest` (moving pointer to most recent)
+- `ghcr.io/michaeltg17/shop-ui` — two tags per push: `:<sha>` (pinned deployable version) and `:latest` (moving pointer to most recent)
+- SHA tag pins the deployable version; `latest` tracks the most recent successful CI
 
 ## General Rules
 

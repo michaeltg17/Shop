@@ -19,7 +19,7 @@ jobs:
       - name: Trigger dev deployment
         run: |
           set -e
-          BODY='{"environment":"dev","image_tag":"${{ github.event.workflow_run.head_sha }}","commit_sha":"${{ github.event.workflow_run.head_sha }}","commit_message":"${{ github.event.workflow_run.head_commit.message }}"}'
+          BODY='{"environment":"dev","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
@@ -39,7 +39,7 @@ jobs:
       - name: Trigger qa deployment
         run: |
           set -e
-          BODY='{"environment":"qa","image_tag":"${{ github.event.workflow_run.head_sha }}","commit_sha":"${{ github.event.workflow_run.head_sha }}","commit_message":"${{ github.event.workflow_run.head_commit.message }}"}'
+          BODY='{"environment":"qa","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
@@ -59,7 +59,7 @@ jobs:
       - name: Trigger prod deployment
         run: |
           set -e
-          BODY='{"environment":"prod","image_tag":"${{ github.event.workflow_run.head_sha }}","commit_sha":"${{ github.event.workflow_run.head_sha }}","commit_message":"${{ github.event.workflow_run.head_commit.message }}"}'
+          BODY='{"environment":"prod","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
