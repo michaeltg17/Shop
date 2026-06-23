@@ -23,7 +23,14 @@
       </div>
       <div class="thumbnails">
         @for (img of getImages(); track img; let i = $index) {
-        <div class="thumbnail" [class.active]="i === selectedImageIndex()" (click)="selectImage(i)" (keydown.enter)="selectImage(i)" (keydown.space)="selectImage(i)" tabindex="0">
+        <div
+          class="thumbnail"
+          [class.active]="i === selectedImageIndex()"
+          (click)="selectImage(i)"
+          (keydown.enter)="selectImage(i)"
+          (keydown.space)="selectImage(i)"
+          tabindex="0"
+        >
           <img [src]="img" [alt]="'Thumbnail ' + (i + 1)" />
         </div>
         }
@@ -86,7 +93,15 @@
       <h3>Write a Review</h3>
       <div class="form-group">
         <label id="rating-label">Rating</label>
-        <div class="rating-input" role="radiogroup" aria-labelledby="rating-label" (click)="newRating() < 5 ? newRating.update(r => r + 1) : null" (keydown.enter)="newRating() < 5 ? newRating.update(r => r + 1) : null" (keydown.space)="newRating() < 5 ? newRating.update(r => r + 1) : null" tabindex="0">
+        <div
+          class="rating-input"
+          role="radiogroup"
+          aria-labelledby="rating-label"
+          (click)="newRating() < 5 ? newRating.update(r => r + 1) : null"
+          (keydown.enter)="newRating() < 5 ? newRating.update(r => r + 1) : null"
+          (keydown.space)="newRating() < 5 ? newRating.update(r => r + 1) : null"
+          tabindex="0"
+        >
           @for (s of getStars(newRating()); track s) {
           <mat-icon class="star-active">star</mat-icon>
           } @for (s of getEmptyStars(newRating()); track s) {
