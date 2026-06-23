@@ -4,6 +4,11 @@ Status: Waiting for CI
 Task: #124 feat: add product detail page with images, description, reviews
 Branch: feature/gh-124-product-detail-page
 PR: #126
-Last commit: df8bf8b fix(product-detail-page): proper jest test isolation and assertions
+Last commit: 6c8255c fix(test): proper async handling for product-detail-page spec tests
 CI: pushed fix, waiting for results
+Fixes applied:
+  - loading() test: of() emits synchronously, changed assertion to check loading=false + product set
+  - snackBar mock: added overrideComponent to inject mock over MatSnackBarModule
+  - Test isolation: added mockClear() between addToCart tests
 Started: 2026-06-23 08:54 CEST
+Updated: 2026-06-23 08:58 CEST

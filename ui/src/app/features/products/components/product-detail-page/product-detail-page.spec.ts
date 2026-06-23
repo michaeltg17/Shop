@@ -74,9 +74,11 @@ describe('ProductDetailPage', () => {
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: Router, useValue: mockRouter },
       ],
-    }).overrideComponent(ProductDetailPage, {
-      addProviders: [{ provide: MatSnackBar, useValue: snackBar }],
-    }).compileComponents();
+    })
+      .overrideComponent(ProductDetailPage, {
+        addProviders: [{ provide: MatSnackBar, useValue: snackBar }],
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(ProductDetailPage);
     component = fixture.componentInstance;
