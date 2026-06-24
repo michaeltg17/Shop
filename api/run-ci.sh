@@ -22,7 +22,8 @@ echo "Build successful"
 # Step 3: Tests
 echo ""
 echo "[3/3] Running tests..."
-dotnet test tests/Api.Tests/Api.Tests.csproj --verbosity normal
+dotnet restore tests/Api.Tests/Api.Tests.csproj --force
+dotnet test tests/Api.Tests/Api.Tests.csproj --no-build --verbosity normal
 echo "Tests passed"
 
 echo ""
