@@ -8,8 +8,7 @@ echo "========================================="
 # Step 1: Restore
 echo ""
 echo "[1/3] Restoring packages..."
-dotnet restore src/Api/Api.csproj
-dotnet restore tests/Api.Tests/Api.Tests.csproj
+dotnet restore Shop.slnx
 echo "Restore successful"
 
 # Step 2: Build
@@ -18,10 +17,10 @@ echo "[2/3] Building..."
 dotnet build src/Api/Api.csproj
 echo "Build successful"
 
-# Step 3: Tests (self-migrate via TestBase.Migrate in constructors)
+# Step 3: Tests
 echo ""
 echo "[3/3] Running tests..."
-dotnet test tests/Api.Tests/Api.Tests.csproj --verbosity normal
+dotnet test tests/Api.Tests/Api.Tests.csproj --no-build --verbosity normal
 echo "Tests passed"
 
 echo ""
