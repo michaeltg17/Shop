@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile.ci
     image: shop-api-ci:latest
-    command: ["/bin/bash", "/app/run-ci.sh"]
+    command: ["/bin/bash", "/app/ci.sh"]
     depends_on:
       db:
         condition: service_healthy

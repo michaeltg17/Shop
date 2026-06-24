@@ -43,8 +43,8 @@ shop/
 
 ### Local CI
 
-- API:  `docker compose -f docker-compose.ci.yml run --rm ci` (from `api/`)
-- UI:   `docker compose -f docker-compose.ci.yml run --rm ci` (from `ui/`)
+- API:  `./ci.sh`, `./ci-docker.sh`, `./ci-docker-build.sh`, `./clean.sh` (from `api/`)
+- UI:   `./ci.sh` (from `ui/`)
 
 ### Registry
 

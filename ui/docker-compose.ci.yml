@@ -11,4 +11,4 @@ services:
     volumes:
       - ./coverage:/app/coverage
       - ./reports:/app/reports
-    command: ["/bin/bash", "/app/run-ci.sh"]
+    command: ["/bin/bash", "/app/ci.sh"]

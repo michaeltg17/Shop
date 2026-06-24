@@ -12,7 +12,7 @@
     "playwright": "playwright test",
     "playwright:install": "npx playwright install",
     "stryker": "npx stryker run",
-    "ci": "bash run-ci.sh",
+    "ci": "bash ci.sh",
     "ci:docker": "docker compose -f docker-compose.ci.yml run --rm ci",
     "ci:docker:build": "docker compose -f docker-compose.ci.yml build"
   },

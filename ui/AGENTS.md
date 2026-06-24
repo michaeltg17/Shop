@@ -64,6 +64,10 @@ npm run playwright    # E2E tests
 npm run prettier      # Format files
 npm run stryker       # Mutation testing
 
+## CI
+
+./ci.sh               # Run full CI pipeline (prettier, lint, tests, build, E2E, SonarCloud)
+
 ## Build Budgets
 
 | Type | Warning | Error |

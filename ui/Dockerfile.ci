@@ -16,4 +16,4 @@ COPY . .
 # Set environment variables for headless testing
 ENV NODE_ENV=ci
 
-CMD ["bash", "./run-ci.sh"]
+CMD ["bash", "./ci.sh"]
