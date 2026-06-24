@@ -10,7 +10,7 @@
       <input
         matInput
         type="text"
-        [(ngModel)]="name"
+        [(ngModel)]="name" name="name"
         (ngModelChange)="update()"
         required
         placeholder="John Doe"
@@ -22,7 +22,7 @@
       <input
         matInput
         type="text"
-        [(ngModel)]="addressLine1"
+        [(ngModel)]="addressLine1" name="addressLine1"
         (ngModelChange)="update()"
         required
         placeholder="123 Main Street"
@@ -34,7 +34,7 @@
       <input
         matInput
         type="text"
-        [(ngModel)]="addressLine2"
+        [(ngModel)]="addressLine2" name="addressLine2"
         (ngModelChange)="update()"
         placeholder="Apt, Suite, etc. (optional)"
       />
@@ -46,7 +46,7 @@
         <input
           matInput
           type="text"
-          [(ngModel)]="city"
+          [(ngModel)]="city" name="city"
           (ngModelChange)="update()"
           required
           placeholder="New York"
@@ -58,7 +58,7 @@
         <input
           matInput
           type="text"
-          [(ngModel)]="state"
+          [(ngModel)]="state" name="state"
           (ngModelChange)="update()"
           required
           placeholder="NY"
@@ -72,7 +72,7 @@
         <input
           matInput
           type="text"
-          [(ngModel)]="zip"
+          [(ngModel)]="zip" name="zip"
           (ngModelChange)="update()"
           required
           placeholder="10001"
@@ -84,7 +84,7 @@
         <input
           matInput
           type="text"
-          [(ngModel)]="country"
+          [(ngModel)]="country" name="country"
           (ngModelChange)="update()"
           required
           placeholder="United States"
