@@ -10,12 +10,12 @@ using Xunit;
 
 namespace Api.Tests;
 
-public class OrdersEndpointsTests : IAsyncDisposable
+public class OrderEndpointsTests : IAsyncDisposable
 {
     private readonly WebApplicationFactory<Program> _factory;
     private readonly HttpClient _client;
 
-    public OrdersEndpointsTests()
+    public OrderEndpointsTests()
     {
         _factory = new WebApplicationFactory<Program>();
         TestBase.Migrate(_factory);
@@ -39,10 +39,10 @@ public class OrdersEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PostAsync("/api/orders", content);
+        var response = await _client.PostAsync("/api/orders", content, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var body = await response.Content.ReadFromJsonAsync<Order>();
+        var body = await response.Content.ReadFromJsonAsync<Order>(TestContext.Current.CancellationToken);
         body!.Should().NotBeNull();
         body!.Id.Should().BeGreaterThan(0);
         body!.Items.Should().HaveCount(2);
@@ -64,12 +64,12 @@ public class OrdersEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(orderRequest),
             Encoding.UTF8,
             "application/json");
-        await _client.PostAsync("/api/orders", content);
+        await _client.PostAsync("/api/orders", content, TestContext.Current.CancellationToken);
 
-        var response = await _client.GetAsync("/api/orders");
+        var response = await _client.GetAsync("/api/orders", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var bodies = await response.Content.ReadFromJsonAsync<List<Order>>();
+        var bodies = await response.Content.ReadFromJsonAsync<List<Order>>(TestContext.Current.CancellationToken);
         bodies.Should().NotBeEmpty();
     }
 
@@ -87,22 +87,22 @@ public class OrdersEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(orderRequest),
             Encoding.UTF8,
             "application/json");
-        var createResponse = await _client.PostAsync("/api/orders", content);
-        var createdOrder = await createResponse.Content.ReadFromJsonAsync<Order>();
+        var createResponse = await _client.PostAsync("/api/orders", content, TestContext.Current.CancellationToken);
+        var createdOrder = await createResponse.Content.ReadFromJsonAsync<Order>(TestContext.Current.CancellationToken);
 
-        var response = await _client.GetAsync($"/api/orders/{createdOrder!.Id}");
+        var response = await _client.GetAsync($"/api/orders/{createdOrder!.Id}", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<Order>();
+        var body = await response.Content.ReadFromJsonAsync<Order>(TestContext.Current.CancellationToken);
         body!.Id.Should().Be(createdOrder.Id);
     }
 
     [Fact]
     public async Task GetOrderById_WhenNotExists_ReturnsProblemDetails404()
     {
-        var response = await _client.GetAsync("/api/orders/999");
+        var response = await _client.GetAsync("/api/orders/999", TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound, TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()

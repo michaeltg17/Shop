@@ -25,9 +25,9 @@ public class UsersEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task GetUsers_WithoutAuth_ReturnsUnauthorized()
     {
-        var response = await _client.GetAsync("/api/users");
+        var response = await _client.GetAsync("/api/users", TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -39,9 +39,9 @@ public class UsersEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PostAsync("/api/users", content);
+        var response = await _client.PostAsync("/api/users", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -53,9 +53,9 @@ public class UsersEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PutAsync("/api/users/999", content);
+        var response = await _client.PutAsync("/api/users/999", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -71,9 +71,9 @@ public class UsersEndpointsTests : IAsyncDisposable
         {
             Content = content
         };
-        var response = await _client.SendAsync(request);
+        var response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()

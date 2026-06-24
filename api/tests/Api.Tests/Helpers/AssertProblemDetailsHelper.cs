@@ -6,15 +6,18 @@ namespace Api.Tests.Helpers;
 
 public static class AssertProblemDetailsHelper
 {
-    public static async Task AssertProblemDetailsAsync(HttpResponseMessage response, HttpStatusCode expectedStatus)
+    public static async Task AssertProblemDetailsAsync(
+        HttpResponseMessage response,
+        HttpStatusCode expectedStatus,
+        CancellationToken ct = default)
     {
         response.StatusCode.Should().Be(expectedStatus);
 
-        var ct = response.Content.Headers.ContentType;
-        ct.Should().NotBeNull();
-        ct!.MediaType.Should().BeOneOf("application/problem+json", "application/json");
+        var ct2 = response.Content.Headers.ContentType;
+        ct2.Should().NotBeNull();
+        ct2!.MediaType.Should().BeOneOf("application/problem+json", "application/json");
 
-        var body = await response.Content.ReadAsStringAsync();
+        var body = await response.Content.ReadAsStringAsync(ct);
         var doc = JsonDocument.Parse(body);
         var root = doc.RootElement;
 

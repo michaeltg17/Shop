@@ -29,15 +29,15 @@ public class ProductsEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(registerReq),
             Encoding.UTF8,
             "application/json");
-        await _client.PostAsync("/api/auth/register", content);
+        await _client.PostAsync("/api/auth/register", content, TestContext.Current.CancellationToken);
 
         var loginReq = new { Email = "authtest@shop.com", Password = "password123" };
         var loginContent = new StringContent(
             JsonSerializer.Serialize(loginReq),
             Encoding.UTF8,
             "application/json");
-        var loginResponse = await _client.PostAsync("/api/auth/login", loginContent);
-        var loginBody = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>();
+        var loginResponse = await _client.PostAsync("/api/auth/login", loginContent, TestContext.Current.CancellationToken);
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<AuthResponse>(TestContext.Current.CancellationToken);
         return loginBody!.Token;
     }
 
@@ -52,20 +52,20 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task GetProducts_ReturnsAllProducts()
     {
-        var response = await _client.GetAsync("/api/products");
+        var response = await _client.GetAsync("/api/products", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var bodies = await response.Content.ReadFromJsonAsync<List<Product>>();
+        var bodies = await response.Content.ReadFromJsonAsync<List<Product>>(TestContext.Current.CancellationToken);
         bodies.Should().HaveCount(3);
     }
 
     [Fact]
     public async Task GetProductById_WhenExists_ReturnsProduct()
     {
-        var response = await _client.GetAsync("/api/products/1");
+        var response = await _client.GetAsync("/api/products/1", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<Product>();
+        var body = await response.Content.ReadFromJsonAsync<Product>(TestContext.Current.CancellationToken);
         body.Should().NotBeNull();
         body!.Id.Should().Be(1);
     }
@@ -73,9 +73,9 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task GetProductById_WhenNotExists_ReturnsProblemDetails404()
     {
-        var response = await _client.GetAsync("/api/products/999");
+        var response = await _client.GetAsync("/api/products/999", TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -88,10 +88,10 @@ public class ProductsEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await authClient.PostAsync("/api/products", content);
+        var response = await authClient.PostAsync("/api/products", content, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var body = await response.Content.ReadFromJsonAsync<Product>();
+        var body = await response.Content.ReadFromJsonAsync<Product>(TestContext.Current.CancellationToken);
         body.Should().NotBeNull();
         body!.Id.Should().BeGreaterThan(0);
         body!.Name.Should().Be("Monitor");
@@ -107,9 +107,9 @@ public class ProductsEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PostAsync("/api/products", content);
+        var response = await _client.PostAsync("/api/products", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -122,10 +122,10 @@ public class ProductsEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await authClient.PutAsync("/api/products/1", content);
+        var response = await authClient.PutAsync("/api/products/1", content, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<Product>();
+        var body = await response.Content.ReadFromJsonAsync<Product>(TestContext.Current.CancellationToken);
         body.Should().NotBeNull();
         body!.Id.Should().Be(1);
         body!.Name.Should().Be("Updated Laptop");
@@ -141,16 +141,16 @@ public class ProductsEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PutAsync("/api/products/999", content);
+        var response = await _client.PutAsync("/api/products/999", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
     public async Task DeleteProduct_WithAuth_WhenExists_ReturnsNoContent()
     {
         var authClient = await CreateAuthClientAsync();
-        var response = await authClient.DeleteAsync("/api/products/2");
+        var response = await authClient.DeleteAsync("/api/products/2", TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
         authClient.Dispose();
@@ -159,9 +159,9 @@ public class ProductsEndpointsTests : IAsyncDisposable
     [Fact]
     public async Task DeleteProduct_WithoutAuth_ReturnsProblemDetails401()
     {
-        var response = await _client.DeleteAsync("/api/products/3");
+        var response = await _client.DeleteAsync("/api/products/3", TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -174,9 +174,9 @@ public class ProductsEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await authClient.PutAsync("/api/products/999", content);
+        var response = await authClient.PutAsync("/api/products/999", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound, TestContext.Current.CancellationToken);
         authClient.Dispose();
     }
 
@@ -184,9 +184,9 @@ public class ProductsEndpointsTests : IAsyncDisposable
     public async Task DeleteProduct_NotFound_ReturnsProblemDetails404()
     {
         var authClient = await CreateAuthClientAsync();
-        var response = await authClient.DeleteAsync("/api/products/999");
+        var response = await authClient.DeleteAsync("/api/products/999", TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.NotFound, TestContext.Current.CancellationToken);
         authClient.Dispose();
     }
 

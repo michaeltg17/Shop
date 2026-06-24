@@ -31,10 +31,10 @@ public class AuthEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PostAsync("/api/auth/register", content);
+        var response = await _client.PostAsync("/api/auth/register", content, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var body = await response.Content.ReadFromJsonAsync<AuthResponse>(TestContext.Current.CancellationToken);
         body.Should().NotBeNull();
         body!.Token.Should().NotBeNullOrEmpty();
         body.Email.Should().Be("new1@shop.com");
@@ -48,16 +48,16 @@ public class AuthEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(req),
             Encoding.UTF8,
             "application/json");
-        await _client.PostAsync("/api/auth/register", content);
+        await _client.PostAsync("/api/auth/register", content, TestContext.Current.CancellationToken);
 
         var req2 = new { Email = "dup1@shop.com", Password = "password456" };
         var content2 = new StringContent(
             JsonSerializer.Serialize(req2),
             Encoding.UTF8,
             "application/json");
-        var response = await _client.PostAsync("/api/auth/register", content2);
+        var response = await _client.PostAsync("/api/auth/register", content2, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.BadRequest);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.BadRequest, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -69,9 +69,9 @@ public class AuthEndpointsTests : IAsyncDisposable
             Encoding.UTF8,
             "application/json");
 
-        var response = await _client.PostAsync("/api/auth/register", content);
+        var response = await _client.PostAsync("/api/auth/register", content, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.BadRequest);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.BadRequest, TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -82,17 +82,17 @@ public class AuthEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(req),
             Encoding.UTF8,
             "application/json");
-        await _client.PostAsync("/api/auth/register", content);
+        await _client.PostAsync("/api/auth/register", content, TestContext.Current.CancellationToken);
 
         var loginReq = new { Email = "login1@shop.com", Password = "password123" };
         var loginContent = new StringContent(
             JsonSerializer.Serialize(loginReq),
             Encoding.UTF8,
             "application/json");
-        var response = await _client.PostAsync("/api/auth/login", loginContent);
+        var response = await _client.PostAsync("/api/auth/login", loginContent, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        var body = await response.Content.ReadFromJsonAsync<AuthResponse>(TestContext.Current.CancellationToken);
         body.Should().NotBeNull();
         body!.Token.Should().NotBeNullOrEmpty();
     }
@@ -105,9 +105,9 @@ public class AuthEndpointsTests : IAsyncDisposable
             JsonSerializer.Serialize(loginReq),
             Encoding.UTF8,
             "application/json");
-        var response = await _client.PostAsync("/api/auth/login", loginContent);
+        var response = await _client.PostAsync("/api/auth/login", loginContent, TestContext.Current.CancellationToken);
 
-        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized);
+        await AssertProblemDetailsHelper.AssertProblemDetailsAsync(response, HttpStatusCode.Unauthorized, TestContext.Current.CancellationToken);
     }
 
     public async ValueTask DisposeAsync()
