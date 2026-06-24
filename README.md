@@ -8,7 +8,7 @@
 ### Project
 https://github.com/users/michaeltg17/projects/4
 
-Simple shop app to test the limits of an AI dev working 24-7.
+Simple shop app to test the limits of a local AI dev working 24-7.
 
 Built with local AI.
  - Model: cyankiwi/Qwen3.6-27B-AWQ-BF16-INT4 running on 2x RTX 3090. Windows + docker vllm.
