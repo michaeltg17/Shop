@@ -19,7 +19,11 @@ jobs:
       - name: Trigger dev deployment
         run: |
           set -e
-          BODY='{"environment":"dev","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
+          WORKFLOW=${{ github.event.workflow_run.name }}
+          COMPONENT=${WORKFLOW#ci-}
+          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${TAG:0:7}
+          BODY='{"environment":"dev","component":"${COMPONENT}","tag":"${TAG}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
@@ -39,7 +43,11 @@ jobs:
       - name: Trigger qa deployment
         run: |
           set -e
-          BODY='{"environment":"qa","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
+          WORKFLOW=${{ github.event.workflow_run.name }}
+          COMPONENT=${WORKFLOW#ci-}
+          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${TAG:0:7}
+          BODY='{"environment":"qa","component":"${COMPONENT}","tag":"${TAG}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
@@ -59,7 +67,11 @@ jobs:
       - name: Trigger prod deployment
         run: |
           set -e
-          BODY='{"environment":"prod","commit_sha":"${{ github.event.workflow_run.head_sha }}"}'
+          WORKFLOW=${{ github.event.workflow_run.name }}
+          COMPONENT=${WORKFLOW#ci-}
+          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${TAG:0:7}
+          BODY='{"environment":"prod","component":"${COMPONENT}","tag":"${TAG}"}'
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -sf --connect-timeout 10 --max-time 60 \
             -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
