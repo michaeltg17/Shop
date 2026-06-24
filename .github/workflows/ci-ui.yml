@@ -56,11 +56,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Generate coverage badges
-        uses: jpb06/coverage-badges-action@main
-        with:
-          branches: main
-          coverage-summary-path: ui/coverage/coverage-summary.json
+      # - name: Generate coverage badges
+      #   uses: jpb06/coverage-badges-action@main
+      #   with:
+      #     branches: main
+      #     coverage-summary-path: ui/coverage/coverage-summary.json
 
       - name: Validate Docker image builds
         if: github.event_name == 'pull_request'
