@@ -41,6 +41,8 @@
     <PackageReference Include="Microsoft.Bcl.Cryptography" Version="10.0.2">
       <ExcludeAssets>all</ExcludeAssets>
     </PackageReference>
+    <!-- IdentityModel.Abstractions: transitive dep from IdentityModel packages, needed at runtime -->
+    <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="8.19.1" />
   </ItemGroup>
 
   <ItemGroup>
