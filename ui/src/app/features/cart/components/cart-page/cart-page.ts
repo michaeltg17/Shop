@@ -105,7 +105,7 @@ export class CartPage {
         this.snackBar.open(`Order #${order.id} placed successfully!`, 'Close', {
           duration: 4000,
         });
-        this.router.navigate(['/shop/products']);
+        this.router.navigate(['/shop']);
       },
       error: () => {
         this.isCheckoutLoading.set(false);
