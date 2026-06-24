@@ -14,7 +14,7 @@ echo "Restore successful"
 # Step 2: Build
 echo ""
 echo "[2/3] Building..."
-dotnet build src/Api/Api.csproj
+dotnet build
 echo "Build successful"
 
 # Step 3: Tests (self-migrate via TestBase.Migrate in constructors)
