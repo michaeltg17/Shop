@@ -108,5 +108,8 @@ FluentAssertions. xUnit.
 ## Commands
 
 dotnet test
+./run-ci.sh           # Run CI locally (restore, build, test)
+./run-ci-docker.sh    # Run CI in Docker (build image + run)
+./run-ci-docker-build.sh # Build CI Docker image only
 
 dotnet ef migrations add <Name> --project src/Api/Api.csproj --output-dir src/Api/Data/Migrations

@@ -12,12 +12,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" />
   </ItemGroup>
 
-  <Target Name="CIBuild">
-    <Exec Command="docker compose -f docker-compose.ci.yml build" WorkingDirectory="$(MSBuildProjectDirectory)/../.." />
-  </Target>
-
-  <Target Name="CIDocker">
-    <Exec Command="docker compose -f docker-compose.ci.yml run --rm ci" WorkingDirectory="$(MSBuildProjectDirectory)/../.." />
-  </Target>
-
 </Project>
