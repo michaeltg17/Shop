@@ -33,7 +33,13 @@ describe('LoginPage', () => {
       providers: [
         provideRouter([
           { path: 'admin/users', redirectTo: '' },
-          { path: 'shop', children: [{ path: '', redirectTo: '' }, { path: 'products', redirectTo: '' }] },
+          {
+            path: 'shop',
+            children: [
+              { path: '', redirectTo: '' },
+              { path: 'products', redirectTo: '' },
+            ],
+          },
           { path: '', component: LoginPage },
         ]),
         { provide: AuthService, useValue: authServiceSpy },
