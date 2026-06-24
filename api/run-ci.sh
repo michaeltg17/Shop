@@ -8,7 +8,6 @@ echo "========================================="
 # Step 1: Restore
 echo ""
 echo "[1/2] Restoring packages..."
-dotnet nuget locals all --clear
 dotnet restore Shop.slnx
 dotnet restore tests/Api.Tests/Api.Tests.csproj
 echo "Restore successful"
