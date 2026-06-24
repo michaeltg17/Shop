@@ -10,7 +10,6 @@ describe('ConfirmationPage', () => {
   let fixture: ComponentFixture<ConfirmationPage>;
   let httpMock: HttpTestingController;
   let router: Router;
-  let activatedRoute: ActivatedRoute;
 
   const mockOrder: OrderResponse = {
     id: 42,

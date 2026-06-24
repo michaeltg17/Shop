@@ -1,18 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
-import { provideRouter, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter } from '@angular/router';
 import { CheckoutPage } from './checkout-page';
 import { CheckoutService } from '../../services/checkout.service';
-import { CartService } from '../../../cart/cart.service';
 
 describe('CheckoutPage', () => {
   let component: CheckoutPage;
   let fixture: ComponentFixture<CheckoutPage>;
   let checkoutService: CheckoutService;
   let snackBarSpy: jest.SpyInstance;
-  let router: Router;
 
   beforeEach(async () => {
     localStorage.clear();
@@ -25,7 +22,6 @@ describe('CheckoutPage', () => {
     fixture = TestBed.createComponent(CheckoutPage);
     component = fixture.componentInstance;
     checkoutService = TestBed.inject(CheckoutService);
-    router = TestBed.inject(Router);
 
     snackBarSpy = jest.spyOn(component['snackBar'], 'open');
 
