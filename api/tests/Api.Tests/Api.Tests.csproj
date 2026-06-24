@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <OutputType>Library</OutputType>
     <RollForward>LatestMajor</RollForward>
+    <!-- Force all assemblies from deps.json to be copied locally (needed for non-shared-framework deps like IdentityModel) -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
