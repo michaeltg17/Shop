@@ -29,6 +29,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <!-- Bcl.TimeProvider is built into .NET 10; suppress transitive runtime DLL from IdentityModel -->
+    <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="8.0.1">
+      <ExcludeAssets>runtime</ExcludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
