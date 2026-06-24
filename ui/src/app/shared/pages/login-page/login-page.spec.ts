@@ -33,7 +33,13 @@ describe('LoginPage', () => {
       providers: [
         provideRouter([
           { path: 'admin/users', redirectTo: '' },
-          { path: 'shop/products', redirectTo: '' },
+          {
+            path: 'shop',
+            children: [
+              { path: '', redirectTo: '', pathMatch: 'full' },
+              { path: 'products', redirectTo: '', pathMatch: 'full' },
+            ],
+          },
           { path: '', component: LoginPage },
         ]),
         { provide: AuthService, useValue: authServiceSpy },
@@ -74,10 +80,10 @@ describe('LoginPage', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/admin/users']);
   });
 
-  it('should redirect customer to /shop/products when already authenticated', () => {
+  it('should redirect customer to /shop when already authenticated', () => {
     authServiceSpy.user!.mockReturnValue({ username: 'customer1', isAdmin: false } as User);
     component.ngOnInit();
-    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop']);
   });
 
   it('should not redirect when not authenticated', () => {
@@ -113,13 +119,13 @@ describe('LoginPage', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/admin/users']);
   }));
 
-  it('should navigate to /shop/products on successful customer login', fakeAsync(() => {
+  it('should navigate to /shop on successful customer login', fakeAsync(() => {
     component.credentials = { username: 'customer1', password: 'pass123' };
     authServiceSpy.login!.mockReturnValue(of(true));
     authServiceSpy.user!.mockReturnValue({ username: 'customer1', isAdmin: false } as User);
     component.onLogin();
     tick(0);
-    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop']);
   }));
 
   it('should set message when only username is provided', fakeAsync(() => {
@@ -180,7 +186,7 @@ describe('LoginPage', () => {
     expect(component.message).toBe('Registration successful! Redirecting to shop...');
     expect(component.messageError).toBe(false);
     tick(1000); // Wait for redirect timeout
-    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop']);
   }));
 
   it('should clear message and set error on failed register attempt', fakeAsync(() => {

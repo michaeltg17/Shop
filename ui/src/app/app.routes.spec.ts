@@ -20,7 +20,7 @@ describe('app.routes', () => {
   it('should have a root redirect to login', () => {
     const rootRoute = routes.find(r => r.path === '');
     expect(rootRoute).toBeDefined();
-    expect(rootRoute?.redirectTo).toBe('shop/products');
+    expect(rootRoute?.redirectTo).toBe('shop');
     expect(rootRoute?.pathMatch).toBe('full');
   });
 
@@ -107,9 +107,14 @@ describe('app.routes', () => {
 
   it('should have products route nested under shop', () => {
     const shopRoute = routes.find(r => r.path === 'shop');
-    const route = shopRoute?.children?.find(c => c.path === 'products');
-    expect(route).toBeDefined();
-    expect(route?.component).toBe(ProductsPage);
+    // root of shop now shows ProductsPage directly
+    const rootRoute = shopRoute?.children?.find(c => c.path === '');
+    expect(rootRoute).toBeDefined();
+    expect(rootRoute?.component).toBe(ProductsPage);
+    // /shop/products redirects to /shop
+    const productsRoute = shopRoute?.children?.find(c => c.path === 'products');
+    expect(productsRoute).toBeDefined();
+    expect(productsRoute?.redirectTo).toBe('');
   });
 
   it('should have cart route nested under shop', () => {

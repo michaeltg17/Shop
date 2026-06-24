@@ -146,7 +146,7 @@ export class ProductDetailPage implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/shop/products']);
+    this.router.navigate(['/shop']);
   }
 
   formatReviewDate(iso: string): string {

@@ -13,7 +13,7 @@ import { AdminLayout } from './shared/layouts/admin-layout/admin-layout';
 import { EcommerceLayout } from './shared/layouts/ecommerce-layout/ecommerce-layout';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'shop/products', pathMatch: 'full' },
+  { path: '', redirectTo: 'shop', pathMatch: 'full' },
   { path: 'login', component: LoginPage },
   {
     path: 'admin',
@@ -54,7 +54,8 @@ export const routes: Routes = [
     path: 'shop',
     component: EcommerceLayout,
     children: [
-      { path: 'products', component: ProductsPage },
+      { path: '', component: ProductsPage },
+      { path: 'products', redirectTo: '', pathMatch: 'full' },
       { path: 'products/:id', component: ProductDetailPage },
       { path: 'cart', component: CartPage },
       { path: 'orders', component: OrdersPage },

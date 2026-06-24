@@ -118,7 +118,7 @@ describe('ProductDetailPage', () => {
 
   it('should navigate back when goBack is called', () => {
     component.goBack();
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/shop']);
   });
 
   it('should add product to cart', () => {
@@ -278,6 +278,6 @@ describe('ProductDetailPage', () => {
 
   it('should goBack to products page', () => {
     component.goBack();
-    expect(mockRouter.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(mockRouter.navigate).toHaveBeenCalledWith(['/shop']);
   });
 });

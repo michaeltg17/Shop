@@ -127,7 +127,7 @@ describe('CartPage', () => {
     fixture.detectChanges();
     component.checkout();
     expect(cartService.clearCart).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/shop/products']);
+    expect(router.navigate).toHaveBeenCalledWith(['/shop']);
   });
 
   it('should not checkout when no items are selected', () => {

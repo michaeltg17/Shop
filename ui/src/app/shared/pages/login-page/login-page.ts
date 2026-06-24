@@ -58,7 +58,7 @@ export class LoginPage implements OnInit {
       if (user.isAdmin) {
         this.router.navigate(['/admin/users']);
       } else {
-        this.router.navigate(['/shop/products']);
+        this.router.navigate(['/shop']);
       }
     }
   }
@@ -85,7 +85,7 @@ export class LoginPage implements OnInit {
           if (user?.isAdmin) {
             this.router.navigate(['/admin/users']);
           } else {
-            this.router.navigate(['/shop/products']);
+            this.router.navigate(['/shop']);
           }
         } else {
           this.message = 'Invalid username or password';
@@ -115,7 +115,7 @@ export class LoginPage implements OnInit {
           this.message = 'Registration successful! Redirecting to shop...';
           this.messageError = false;
           setTimeout(() => {
-            this.router.navigate(['/shop/products']);
+            this.router.navigate(['/shop']);
           }, 1000);
         } else {
           this.message = 'Username already taken';
