@@ -36,8 +36,8 @@ describe('LoginPage', () => {
           {
             path: 'shop',
             children: [
-              { path: '', redirectTo: '' },
-              { path: 'products', redirectTo: '' },
+              { path: '', redirectTo: '', pathMatch: 'full' },
+              { path: 'products', redirectTo: '', pathMatch: 'full' },
             ],
           },
           { path: '', component: LoginPage },
