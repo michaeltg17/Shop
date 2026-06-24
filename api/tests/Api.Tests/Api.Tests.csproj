@@ -51,4 +51,14 @@
     <ProjectReference Include="..\..\src\Api\Api.csproj" />
   </ItemGroup>
 
+  <!-- Force copy of IdentityModel assemblies into output dir (SDK marks them as shared-framework but they are not) -->
+  <Target Name="CopyIdentityModelAssemblies" AfterTargets="Build">
+    <ItemGroup>
+      <_IdentityModelDlls Include="$(NuGetPackageRoot)microsoft.identitymodel.abstractions/8.19.1/lib/net10.0/Microsoft.IdentityModel.Abstractions.dll" />
+      <_IdentityModelDlls Include="$(NuGetPackageRoot)microsoft.identitymodel.logging/8.19.1/lib/net10.0/Microsoft.IdentityModel.Logging.dll" />
+      <_IdentityModelDlls Include="$(NuGetPackageRoot)microsoft.identitymodel.jsonwebtokens/8.19.1/lib/net10.0/Microsoft.IdentityModel.JsonWebTokens.dll" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_IdentityModelDlls)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+
 </Project>
