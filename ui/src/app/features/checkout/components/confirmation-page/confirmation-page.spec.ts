@@ -14,9 +14,7 @@ describe('ConfirmationPage', () => {
 
   const mockOrder: OrderResponse = {
     id: 42,
-    items: [
-      { productId: 1, productName: 'Widget', price: 29.99, quantity: 2 },
-    ],
+    items: [{ productId: 1, productName: 'Widget', price: 29.99, quantity: 2 }],
     total: 65.97,
     shipping: 5.99,
     status: 'pending',

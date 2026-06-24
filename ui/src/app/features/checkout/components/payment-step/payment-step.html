@@ -28,7 +28,8 @@
       <input
         matInput
         type="text"
-        [(ngModel)]="cardName" name="cardName"
+        [(ngModel)]="cardName"
+        name="cardName"
         (ngModelChange)="update()"
         placeholder="John Doe"
       />
@@ -64,7 +65,8 @@
         <input
           matInput
           type="text"
-          [(ngModel)]="cvv" name="cvv"
+          [(ngModel)]="cvv"
+          name="cvv"
           (ngModelChange)="update()"
           placeholder="123"
           maxlength="4"

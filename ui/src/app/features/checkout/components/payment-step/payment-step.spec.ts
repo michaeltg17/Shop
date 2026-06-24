@@ -15,10 +15,7 @@ describe('PaymentStep', () => {
 
     await TestBed.configureTestingModule({
       imports: [PaymentStep, FormsModule],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PaymentStep);

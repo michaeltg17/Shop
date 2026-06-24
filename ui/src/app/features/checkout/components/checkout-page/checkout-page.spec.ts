@@ -19,11 +19,7 @@ describe('CheckoutPage', () => {
 
     await TestBed.configureTestingModule({
       imports: [CheckoutPage],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([]),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(CheckoutPage);
@@ -210,11 +206,9 @@ describe('CheckoutPage', () => {
       });
       component.next();
 
-      expect(snackBarSpy).toHaveBeenCalledWith(
-        'Please fill in all payment fields',
-        'Close',
-        { duration: 3000 }
-      );
+      expect(snackBarSpy).toHaveBeenCalledWith('Please fill in all payment fields', 'Close', {
+        duration: 3000,
+      });
       expect(checkoutService.getCurrentStep()).toBe(1);
     });
 
@@ -228,11 +222,9 @@ describe('CheckoutPage', () => {
       });
       component.next();
 
-      expect(snackBarSpy).toHaveBeenCalledWith(
-        'Please fill in all payment fields',
-        'Close',
-        { duration: 3000 }
-      );
+      expect(snackBarSpy).toHaveBeenCalledWith('Please fill in all payment fields', 'Close', {
+        duration: 3000,
+      });
     });
 
     it('should show snackbar when cvv is missing at step 1', () => {
@@ -245,11 +237,9 @@ describe('CheckoutPage', () => {
       });
       component.next();
 
-      expect(snackBarSpy).toHaveBeenCalledWith(
-        'Please fill in all payment fields',
-        'Close',
-        { duration: 3000 }
-      );
+      expect(snackBarSpy).toHaveBeenCalledWith('Please fill in all payment fields', 'Close', {
+        duration: 3000,
+      });
     });
 
     it('should allow card number with spaces at step 1', () => {

@@ -15,10 +15,7 @@ describe('ShippingStep', () => {
 
     await TestBed.configureTestingModule({
       imports: [ShippingStep, FormsModule],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ShippingStep);

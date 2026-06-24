@@ -26,10 +26,7 @@ describe('ReviewStep', () => {
 
     await TestBed.configureTestingModule({
       imports: [ReviewStep],
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ReviewStep);
