@@ -8,7 +8,12 @@ import {
   TwoFaSetupResponse,
 } from '../../../core/auth/services/auth.service';
 import { TitleService } from '../../../core/services/title.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
+
+interface UserPageWithSnackBar {
+  snackBar: MatSnackBar;
+}
 
 describe('UserPage', () => {
   let component: UserPage;
@@ -94,8 +99,8 @@ describe('UserPage', () => {
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
 
     // Spy on the snackBar instance injected into the component
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
 
     fixture.detectChanges();
   }
@@ -125,8 +130,8 @@ describe('UserPage', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
     fixture.detectChanges();
     tick();
     expect(component.loading).toBe(false);
@@ -149,8 +154,8 @@ describe('UserPage', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
     fixture.detectChanges();
     tick();
     expect(component.editDisplayName).toBe('');
@@ -566,8 +571,8 @@ describe('UserPage', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
     component.activeTab = 'twofa';
     fixture.detectChanges();
     tick();
@@ -582,8 +587,8 @@ describe('UserPage', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
     component.activeTab = 'security';
     fixture.detectChanges();
     tick();
@@ -598,8 +603,8 @@ describe('UserPage', () => {
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
     jest.spyOn(router, 'navigate').mockResolvedValue(true);
-    const snackBar = (component as any).snackBar;
-    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() } as any);
+    const snackBar = (component as UserPageWithSnackBar).snackBar;
+    snackBarOpen = jest.spyOn(snackBar, 'open').mockReturnValue({ close: jest.fn() });
     component.activeTab = 'profile';
     fixture.detectChanges();
     tick();
