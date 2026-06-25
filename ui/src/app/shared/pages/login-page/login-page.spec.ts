@@ -259,7 +259,9 @@ describe('LoginPage', () => {
     component.onForgotPassword();
     tick(0);
     expect(component.isResetSent).toBe(true);
-    expect(component.message).toBe('If an account with that email exists, a password reset link has been sent.');
+    expect(component.message).toBe(
+      'If an account with that email exists, a password reset link has been sent.'
+    );
     expect(component.messageError).toBe(false);
   }));
 

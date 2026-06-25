@@ -1,7 +1,12 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UserPage } from './user-page';
 import { provideRouter, Router, RouterModule } from '@angular/router';
-import { AuthService, ProfileResponse, TwoFaStatusResponse, TwoFaSetupResponse } from '../../../core/auth/services/auth.service';
+import {
+  AuthService,
+  ProfileResponse,
+  TwoFaStatusResponse,
+  TwoFaSetupResponse,
+} from '../../../core/auth/services/auth.service';
 import { TitleService } from '../../../core/services/title.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
@@ -127,7 +132,9 @@ describe('UserPage', () => {
     fixture.detectChanges();
     tick();
     expect(component.loading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load profile', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load profile', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle profile with null displayName and phoneNumber', fakeAsync(() => {
@@ -184,14 +191,18 @@ describe('UserPage', () => {
     component.saveProfile();
     tick();
     expect(component.savingProfile).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to update profile', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to update profile', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // changePassword tests
   it('should show error when password fields are empty', () => {
     createComponent();
     component.changePassword();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Please fill all fields', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Please fill all fields', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should show error when new passwords do not match', () => {
@@ -200,7 +211,9 @@ describe('UserPage', () => {
     component.newPassword = 'new1';
     component.confirmPassword = 'new2';
     component.changePassword();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('New passwords do not match', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('New passwords do not match', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should show error when password is too short', () => {
@@ -209,7 +222,11 @@ describe('UserPage', () => {
     component.newPassword = 'short';
     component.confirmPassword = 'short';
     component.changePassword();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Password must be at least 6 characters', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith(
+      'Password must be at least 6 characters',
+      'Dismiss',
+      { duration: 2000 }
+    );
   });
 
   it('should change password successfully', fakeAsync(() => {
@@ -228,7 +245,9 @@ describe('UserPage', () => {
     expect(component.newPassword).toBe('');
     expect(component.confirmPassword).toBe('');
     expect(component.changingPassword).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Password changed successfully', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Password changed successfully', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle change password error', fakeAsync(() => {
@@ -256,7 +275,9 @@ describe('UserPage', () => {
     tick();
     expect(authServiceSpy.sendEmailConfirmation).toHaveBeenCalled();
     expect(component.sendingConfirmation).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Confirmation email sent', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Confirmation email sent', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle email confirmation error', fakeAsync(() => {
@@ -266,7 +287,9 @@ describe('UserPage', () => {
     component.sendEmailConfirmation();
     tick();
     expect(component.sendingConfirmation).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to send confirmation email', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to send confirmation email', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // 2FA setup tests
@@ -290,7 +313,9 @@ describe('UserPage', () => {
     component.setupTwoFa();
     tick();
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('2FA is already enabled', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('2FA is already enabled', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle 2FA setup general error', fakeAsync(() => {
@@ -300,7 +325,9 @@ describe('UserPage', () => {
     component.setupTwoFa();
     tick();
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to get 2FA setup', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to get 2FA setup', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // enableTwoFa tests
@@ -308,14 +335,18 @@ describe('UserPage', () => {
     createComponent();
     component.setupVerificationCode = '12345';
     component.enableTwoFa();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should show error for empty 2FA code', () => {
     createComponent();
     component.setupVerificationCode = '';
     component.enableTwoFa();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should enable 2FA successfully', fakeAsync(() => {
@@ -328,7 +359,9 @@ describe('UserPage', () => {
     expect(component.showingSetup).toBe(false);
     expect(component.setupVerificationCode).toBe('');
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('2FA enabled successfully', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('2FA enabled successfully', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle enable 2FA error', fakeAsync(() => {
@@ -339,7 +372,9 @@ describe('UserPage', () => {
     component.enableTwoFa();
     tick();
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Invalid verification code', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Invalid verification code', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // disableTwoFa tests
@@ -347,7 +382,9 @@ describe('UserPage', () => {
     createComponent();
     component.disableVerificationCode = '12345';
     component.disableTwoFa();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should disable 2FA successfully', fakeAsync(() => {
@@ -370,7 +407,9 @@ describe('UserPage', () => {
     component.disableTwoFa();
     tick();
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Invalid verification code', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Invalid verification code', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // Recovery codes tests
@@ -389,14 +428,18 @@ describe('UserPage', () => {
     authServiceSpy.getRecoveryCodes!.mockReturnValue(throwError(() => new Error('Error')));
     component.getRecoveryCodes();
     tick();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to get recovery codes', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to get recovery codes', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should show error for invalid reset recovery codes verification', () => {
     createComponent();
     component.resetCodesVerificationCode = '123';
     component.resetRecoveryCodes();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', { duration: 2000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Enter a valid 6-digit code', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should reset recovery codes successfully', fakeAsync(() => {
@@ -409,7 +452,9 @@ describe('UserPage', () => {
     expect(component.recoveryCodes).toEqual(['newcode1', 'newcode2']);
     expect(component.resetCodesVerificationCode).toBe('');
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Recovery codes reset', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Recovery codes reset', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   it('should handle reset recovery codes error', fakeAsync(() => {
@@ -420,7 +465,9 @@ describe('UserPage', () => {
     component.resetRecoveryCodes();
     tick();
     expect(component.twoFaLoading).toBe(false);
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to reset recovery codes', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to reset recovery codes', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // Logout test
@@ -471,7 +518,9 @@ describe('UserPage', () => {
     authServiceSpy.getTwoFaStatus!.mockReturnValue(throwError(() => new Error('Error')));
     component.loadTwoFaStatus();
     tick();
-    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load 2FA status', 'Dismiss', { duration: 3000 });
+    expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to load 2FA status', 'Dismiss', {
+      duration: 3000,
+    });
   }));
 
   // Edge cases
