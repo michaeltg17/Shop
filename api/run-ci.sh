@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Ensure testhost can find NuGet packages at runtime
+export NUGET_PACKAGES=${NUGET_PACKAGES:-$HOME/.nuget/packages}
+
 echo "========================================="
 echo "  Running CI Pipeline in Docker"
 echo "========================================="
