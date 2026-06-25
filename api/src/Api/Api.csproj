@@ -8,13 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Shared framework packages: use floating version to match SDK shared framework -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[10.0,)" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="[10.0,)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0,)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="[10.0,)" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0,)" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[10.0,)" />
+    <!-- Shared framework packages: floating version from 10.0.4+ to satisfy Npgsql and match SDK -->
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="[10.0.4,)" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="[10.0.4,)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="[10.0.4,)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="[10.0.4,)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[10.0.4,)" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[10.0.4,)" />
     <!-- Non-shared packages: normal versioning -->
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.19.1" />
     <PackageReference Include="Microsoft.IdentityModel.Abstractions" Version="8.19.1" />
