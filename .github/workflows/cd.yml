@@ -8,10 +8,15 @@ on:
       - completed
     branches: [main]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Image tag to deploy'
+        required: false
+        default: 'latest'
 
 jobs:
   deploy-dev:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: dev
       url: https://dev.shop.statikk.mooo.com
@@ -20,7 +25,7 @@ jobs:
       - name: Trigger dev deployment
         run: |
           set -e
-          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${{ github.event_name == 'workflow_dispatch' && github.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
           BODY="{\"environment\":\"dev\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
@@ -33,7 +38,7 @@ jobs:
 
   deploy-qa:
     needs: deploy-dev
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: qa
       url: https://qa.shop.statikk.mooo.com
@@ -42,7 +47,7 @@ jobs:
       - name: Trigger qa deployment
         run: |
           set -e
-          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${{ github.event_name == 'workflow_dispatch' && github.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
           BODY="{\"environment\":\"qa\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
@@ -55,7 +60,7 @@ jobs:
 
   deploy-prod:
     needs: deploy-qa
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: prod
       url: https://shop.statikk.mooo.com
@@ -64,7 +69,7 @@ jobs:
       - name: Trigger prod deployment
         run: |
           set -e
-          TAG=${{ github.event.workflow_run.head_sha }}
+          TAG=${{ github.event_name == 'workflow_dispatch' && github.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
           BODY="{\"environment\":\"prod\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
