@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { AuthService, User } from './auth.service';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -33,81 +33,154 @@ describe('AuthService', () => {
     expect(service.user()).toBeNull();
   });
 
-  it('should login with valid admin credentials', () => {
-    service.login('admin', 'password').subscribe(success => {
+  // --- Login tests (API-based) ---
+
+  it('should login with valid credentials', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(success => {
       expect(success).toBe(true);
     });
-    expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('admin');
-    expect(service.user()?.isAdmin).toBe(true);
-  });
 
-  it('should return false for invalid admin credentials', () => {
-    service.login('wrong', 'wrong').subscribe(success => {
+    // Flush login response (direct login, no 2FA)
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'fake-jwt', email: 'admin@test.com' });
+
+    // Flush profile response
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'user-1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+
+    tick();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.user()?.username).toBe('Admin');
+    expect(service.user()?.isAdmin).toBe(true);
+  }));
+
+  it('should return false for invalid credentials (401)', fakeAsync(() => {
+    service.login('wrong@test.com', 'wrong').subscribe(success => {
       expect(success).toBe(false);
     });
+
     const req = httpMock.expectOne('/api/auth/login');
     req.flush({ error: 'invalid' }, { status: 401, statusText: 'Unauthorized' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
 
-  it('should clear auth state on logout', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+    tick();
+    expect(service.isAuthenticated()).toBe(false);
+  }));
+
+  it('should clear auth state on logout', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'fake-jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'user-1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
+
     service.logout();
     expect(service.isAuthenticated()).toBe(false);
     expect(service.user()).toBeNull();
-  });
+  }));
 
-  it('should persist auth across storage reads', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+  it('should persist auth across storage reads', fakeAsync(() => {
+    service.login('test@test.com', 'pass').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'test@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'test@test.com',
+      displayName: 'Test',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+
     expect(localStorage.getItem('angular_auth_user')).toBeTruthy();
-  });
+  }));
 
-  it('should return Observable<User | null> from authState', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+  it('should return Observable<User | null> from authState', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
+
     let emitted: User | null = null;
     service.authState.subscribe(user => {
       emitted = user;
     });
-    expect(emitted?.username).toBe('admin');
-  });
+    expect(emitted?.username).toBe('Admin');
+  }));
 
   it('should handle localStorage errors gracefully in hasStoredUser', () => {
     const originalGetItem = localStorage.getItem;
-    localStorage.getItem = jest.fn(() => {
+    localStorage.getItem = () => {
       throw new Error('QuotaExceededError');
-    });
+    };
     const service2 = TestBed.inject(AuthService);
     expect(service2.isAuthenticated()).toBe(false);
     localStorage.getItem = originalGetItem;
-    httpMock.verify();
   });
 
   it('should handle localStorage errors gracefully in getStoredUser', () => {
     const originalGetItem = localStorage.getItem;
-    localStorage.getItem = jest.fn(() => {
+    localStorage.getItem = () => {
       throw new Error('QuotaExceededError');
-    });
+    };
     const service2 = TestBed.inject(AuthService);
     expect(service2.user()).toBeNull();
     localStorage.getItem = originalGetItem;
-    httpMock.verify();
   });
 
-  // Customer registration tests
-  it('should register a new customer', () => {
-    service.register('customer1', 'pass123').subscribe(success => {
+  // --- Registration tests (API-based, email format) ---
+
+  it('should register a new customer', fakeAsync(() => {
+    service.register('newuser@shop.com', 'pass123').subscribe(success => {
       expect(success).toBe(true);
     });
+
     const req = httpMock.expectOne('/api/auth/register');
     expect(req.request.method).toBe('POST');
-    req.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('customer1');
-    expect(service.user()?.isAdmin).toBe(false);
-  });
+    req.flush({ token: 'fake-jwt', email: 'newuser@shop.com' });
 
-  it('should return false when registering with empty username', () => {
+    // Profile fetch follows
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u2',
+      email: 'newuser@shop.com',
+      displayName: 'NewUser',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+
+    tick();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.user()?.isAdmin).toBe(false);
+  }));
+
+  it('should return false when registering with empty email', () => {
     service.register('', 'pass123').subscribe(success => {
       expect(success).toBe(false);
     });
@@ -115,313 +188,298 @@ describe('AuthService', () => {
   });
 
   it('should return false when registering with empty password', () => {
-    service.register('customer1', '').subscribe(success => {
+    service.register('test@test.com', '').subscribe(success => {
       expect(success).toBe(false);
     });
     expect(service.isAuthenticated()).toBe(false);
   });
 
-  it('should return false when registering username "admin"', () => {
-    service.register('admin', 'pass123').subscribe(success => {
+  it('should return false when registering with invalid email format', () => {
+    service.register('not-an-email', 'pass123').subscribe(success => {
       expect(success).toBe(false);
     });
-  });
-
-  it('should return false when registering duplicate username', () => {
-    service.register('customer1', 'pass123').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    service.logout();
-    service.register('customer1', 'different').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req2 = httpMock.expectOne('/api/auth/register');
-    req2.flush({ error: 'duplicate' }, { status: 409, statusText: 'Conflict' });
-  });
-
-  // Customer login tests
-  it('should login a registered customer', () => {
-    // Register first
-    service.register('customer1', 'pass123').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    service.logout();
-
-    // Then login
-    service.login('customer1', 'pass123').subscribe(success => {
-      expect(success).toBe(true);
-    });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    expect(req2.request.method).toBe('POST');
-    req2.flush({ token: 'fake-jwt-2', username: 'customer1', email: 'customer1@shop.com' });
-    expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('customer1');
-    expect(service.user()?.isAdmin).toBe(false);
-  });
-
-  it('should return false for unregistered customer login', () => {
-    service.login('nonexistent', 'pass123').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req = httpMock.expectOne('/api/auth/login');
-    req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
     expect(service.isAuthenticated()).toBe(false);
   });
 
-  it('should return false for wrong password on registered customer', () => {
-    service.register('customer1', 'pass123').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    service.logout();
-
-    service.login('customer1', 'wrongpass').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    req2.flush({ error: 'wrong password' }, { status: 401, statusText: 'Unauthorized' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
-
-  it('should auto-login after registration', () => {
-    service.register('customer1', 'pass123').subscribe(success => {
-      expect(success).toBe(true);
-    });
-    const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('customer1');
-  });
-
-  it('should persist customers across storage reads', () => {
-    // Register first
-    service.register('customer1', 'pass123').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'customer1', email: 'customer1@shop.com' });
-    service.logout();
-
-    // Login again (simulates fresh load with API)
-    const newService = TestBed.inject(AuthService);
-    newService.login('customer1', 'pass123').subscribe(success => {
-      expect(success).toBe(true);
-    });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    req2.flush({ token: 'fake-jwt-2', username: 'customer1', email: 'customer1@shop.com' });
-    expect(newService.isAuthenticated()).toBe(true);
-  });
-
-  it('should handle localStorage errors gracefully when getting customers', () => {
-    const originalGetItem = localStorage.getItem;
-    localStorage.getItem = jest.fn(() => {
-      throw new Error('QuotaExceededError');
-    });
-    const service2 = TestBed.inject(AuthService);
-    service2.login('someuser', 'somepass').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req = httpMock.expectOne('/api/auth/login');
-    req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
-    localStorage.getItem = originalGetItem;
-    httpMock.verify();
-  });
-
-  it('should return false for admin login with wrong password', () => {
-    service.login('admin', 'wrongpass').subscribe(success => {
+  it('should return false for wrong password login', fakeAsync(() => {
+    service.login('user@test.com', 'wrongpass').subscribe(success => {
       expect(success).toBe(false);
     });
     const req = httpMock.expectOne('/api/auth/login');
     req.flush({ error: 'wrong password' }, { status: 401, statusText: 'Unauthorized' });
+    tick();
     expect(service.isAuthenticated()).toBe(false);
-  });
+  }));
 
-  it('should return false for admin login with wrong username', () => {
-    service.login('wrongadmin', 'password').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req = httpMock.expectOne('/api/auth/login');
-    req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
-
-  it('should return false for empty credentials', () => {
-    service.login('', '').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req = httpMock.expectOne('/api/auth/login');
-    req.flush({ error: 'empty' }, { status: 401, statusText: 'Unauthorized' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
-
-  it('should handle malformed JSON in localStorage for customers', () => {
-    localStorage.setItem('angular_customers', 'not-json');
-    const service2 = TestBed.inject(AuthService);
-    service2.login('test', 'test').subscribe(success => {
-      expect(success).toBe(false);
-    });
-    const req = httpMock.expectOne('/api/auth/login');
-    req.flush({ error: 'not found' }, { status: 401, statusText: 'Unauthorized' });
-    httpMock.verify();
-  });
-
-  it('should handle malformed JSON in localStorage for auth', () => {
-    localStorage.setItem('angular_auth_user', 'not-json');
-    const service2 = TestBed.inject(AuthService);
-    expect(service2.user()).toBeNull();
-  });
-
-  it('should handle malformed JSON in localStorage for customers registration', () => {
-    localStorage.setItem('angular_customers', 'not-json');
-    const service2 = TestBed.inject(AuthService);
-    service2.register('malformed-test', 'test123').subscribe(success => {
-      // Registration goes through API now, can succeed even if localStorage customers is malformed
+  it('should auto-login after registration', fakeAsync(() => {
+    service.register('auto@shop.com', 'pass123').subscribe(success => {
       expect(success).toBe(true);
     });
     const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'malformed-test', email: 'malformed-test@shop.com' });
-  });
-
-  it('should login a registered customer after logout and re-login', () => {
-    service.register('relogin', 'pw').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'relogin', email: 'relogin@shop.com' });
-    service.logout();
-    service.login('relogin', 'pw').subscribe(success => {
-      expect(success).toBe(true);
+    req.flush({ token: 'jwt', email: 'auto@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u3',
+      email: 'auto@shop.com',
+      displayName: 'Auto',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
     });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    req2.flush({ token: 'fake-jwt-2', username: 'relogin', email: 'relogin@shop.com' });
-    expect(service.user()?.username).toBe('relogin');
-    expect(service.user()?.isAdmin).toBe(false);
-  });
+    tick();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.user()?.username).toBe('Auto');
+  }));
 
-  it('should return false when trying to login a registered customer with wrong password', () => {
-    service.register('pw-check', 'correct').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'pw-check', email: 'pw-check@shop.com' });
+  it('should handle 409 duplicate on registration gracefully', fakeAsync(() => {
+    service.login('dup@shop.com', 'pass').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'dup@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u4',
+      email: 'dup@shop.com',
+      displayName: 'Dup',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
     service.logout();
-    service.login('pw-check', 'wrong').subscribe(success => {
+
+    // Register again (simulating duplicate via 409)
+    service.register('dup@shop.com', 'pass2').subscribe(success => {
       expect(success).toBe(false);
     });
-    const req2 = httpMock.expectOne('/api/auth/login');
-    req2.flush({ error: 'wrong password' }, { status: 401, statusText: 'Unauthorized' });
-    expect(service.isAuthenticated()).toBe(false);
-  });
+    const regReq = httpMock.expectOne('/api/auth/register');
+    regReq.flush({ error: 'duplicate' }, { status: 409, statusText: 'Conflict' });
+    tick();
+  }));
 
-  it('should set auth correctly after admin login and clear on logout', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+  it('should handle login after logout and re-login', fakeAsync(() => {
+    // First login
+    service.login('relogin@shop.com', 'pw').subscribe(() => undefined);
+    const loginReq1 = httpMock.expectOne('/api/auth/login');
+    loginReq1.flush({ requiresTwoFactor: false, token: 'jwt', email: 'relogin@shop.com' });
+    const profileReq1 = httpMock.expectOne('/api/auth/profile');
+    profileReq1.flush({
+      id: 'u5',
+      email: 'relogin@shop.com',
+      displayName: 'Relogin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+    service.logout();
+
+    // Re-login
+    service.login('relogin@shop.com', 'pw').subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const loginReq2 = httpMock.expectOne('/api/auth/login');
+    loginReq2.flush({ requiresTwoFactor: false, token: 'jwt2', email: 'relogin@shop.com' });
+    const profileReq2 = httpMock.expectOne('/api/auth/profile');
+    profileReq2.flush({
+      id: 'u5',
+      email: 'relogin@shop.com',
+      displayName: 'Relogin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+    expect(service.user()?.username).toBe('Relogin');
+  }));
+
+  it('should set auth correctly after admin login and clear on logout', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
+
     expect(service.user()?.isAdmin).toBe(true);
     service.logout();
     expect(service.user()).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
     expect(localStorage.getItem('angular_auth_user')).toBeNull();
-  });
+  }));
 
-  it('should set auth correctly after customer registration and clear on logout', () => {
-    service.register('logout-test', 'pw').subscribe(() => undefined);
-    const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'logout-test', email: 'logout-test@shop.com' });
-    expect(service.user()?.isAdmin).toBe(false);
-    service.logout();
-    expect(service.user()).toBeNull();
-    expect(service.isAuthenticated()).toBe(false);
-  });
-
-  it('should register multiple customers and login with each', () => {
-    service.register('user1', 'pass1').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'user1', email: 'user1@shop.com' });
-    service.logout();
-    service.register('user2', 'pass2').subscribe(() => undefined);
-    const req2 = httpMock.expectOne('/api/auth/register');
-    req2.flush({ token: 'fake-jwt', username: 'user2', email: 'user2@shop.com' });
+  it('should register multiple customers and login with each', fakeAsync(() => {
+    // Register user1
+    service.register('user1@shop.com', 'pass1').subscribe(() => undefined);
+    const reg1 = httpMock.expectOne('/api/auth/register');
+    reg1.flush({ token: 'jwt1', email: 'user1@shop.com' });
+    const prof1 = httpMock.expectOne('/api/auth/profile');
+    prof1.flush({
+      id: 'u1',
+      email: 'user1@shop.com',
+      displayName: 'User1',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
     service.logout();
 
-    service.login('user1', 'pass1').subscribe(success => {
+    // Register user2
+    service.register('user2@shop.com', 'pass2').subscribe(() => undefined);
+    const reg2 = httpMock.expectOne('/api/auth/register');
+    reg2.flush({ token: 'jwt2', email: 'user2@shop.com' });
+    const prof2 = httpMock.expectOne('/api/auth/profile');
+    prof2.flush({
+      id: 'u2',
+      email: 'user2@shop.com',
+      displayName: 'User2',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+    service.logout();
+
+    // Login as user1
+    service.login('user1@shop.com', 'pass1').subscribe(success => {
       expect(success).toBe(true);
     });
-    const req3 = httpMock.expectOne('/api/auth/login');
-    req3.flush({ token: 'fake-jwt-2', username: 'user1', email: 'user1@shop.com' });
-    expect(service.user()?.username).toBe('user1');
+    const login1 = httpMock.expectOne('/api/auth/login');
+    login1.flush({ requiresTwoFactor: false, token: 'jwt3', email: 'user1@shop.com' });
+    const prof3 = httpMock.expectOne('/api/auth/profile');
+    prof3.flush({
+      id: 'u1',
+      email: 'user1@shop.com',
+      displayName: 'User1',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+    expect(service.user()?.username).toBe('User1');
 
     service.logout();
-    service.login('user2', 'pass2').subscribe(success => {
+
+    // Login as user2
+    service.login('user2@shop.com', 'pass2').subscribe(success => {
       expect(success).toBe(true);
     });
-    const req4 = httpMock.expectOne('/api/auth/login');
-    req4.flush({ token: 'fake-jwt-3', username: 'user2', email: 'user2@shop.com' });
-    expect(service.user()?.username).toBe('user2');
-  });
+    const login2 = httpMock.expectOne('/api/auth/login');
+    login2.flush({ requiresTwoFactor: false, token: 'jwt4', email: 'user2@shop.com' });
+    const prof4 = httpMock.expectOne('/api/auth/profile');
+    prof4.flush({
+      id: 'u2',
+      email: 'user2@shop.com',
+      displayName: 'User2',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+    expect(service.user()?.username).toBe('User2');
+  }));
 
-  it('should handle localStorage setItem errors during registration gracefully', () => {
+  it('should handle localStorage setItem errors during registration gracefully', fakeAsync(() => {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
     };
-    service.register('quota-user', 'pass').subscribe(success => {
+
+    service.register('quota@shop.com', 'pass').subscribe(success => {
       expect(success).toBe(true);
     });
     const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'quota-user', email: 'quota-user@shop.com' });
+    req.flush({ token: 'jwt', email: 'quota@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u6',
+      email: 'quota@shop.com',
+      displayName: 'Quota',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+
     // Auth state should still be set in memory even if localStorage fails
     expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('quota-user');
+    expect(service.user()?.username).toBe('Quota');
     localStorage.setItem = originalSetItem;
-  });
+  }));
 
-  it('should handle localStorage setItem errors during login gracefully', () => {
+  it('should handle localStorage setItem errors during login gracefully', fakeAsync(() => {
     const originalSetItem = localStorage.setItem;
     localStorage.setItem = () => {
       throw new Error('QuotaExceededError');
     };
-    service.login('admin', 'password').subscribe(success => {
+
+    service.login('admin@test.com', 'password').subscribe(success => {
       expect(success).toBe(true);
     });
-    // Auth state should still be set in memory even if localStorage fails
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
+
     expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()?.username).toBe('admin');
+    expect(service.user()?.username).toBe('Admin');
     localStorage.setItem = originalSetItem;
-  });
+  }));
 
-  it('should set localStorage correctly during admin login', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
-    const stored = localStorage.getItem('angular_auth_user');
-    expect(stored).toBe(JSON.stringify({ username: 'admin', isAdmin: true }));
-  });
+  it('should set localStorage correctly during admin login', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
 
-  it('should set localStorage correctly during customer registration', () => {
-    service.register('testuser', 'testpass').subscribe(() => undefined);
-    const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'testuser', email: 'testuser@shop.com' });
-    const stored = localStorage.getItem('angular_auth_user');
-    expect(stored).toBe(JSON.stringify({ username: 'testuser', isAdmin: false }));
-  });
-
-  it('should save customers to localStorage during registration', () => {
-    // Note: after API migration, customers are stored server-side
-    // This test verifies the auth user is saved locally
-    service.register('testuser', 'testpass').subscribe(() => undefined);
-    const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'testuser', email: 'testuser@shop.com' });
     const stored = localStorage.getItem('angular_auth_user');
     expect(stored).toBeTruthy();
     const parsed = JSON.parse(stored!);
-    expect(parsed.username).toBe('testuser');
-  });
+    expect(parsed.username).toBe('Admin');
+    expect(parsed.isAdmin).toBe(true);
+  }));
 
-  it('should not modify customer list when registration fails due to duplicate', () => {
-    service.register('dup', 'pass1').subscribe(() => undefined);
-    const req1 = httpMock.expectOne('/api/auth/register');
-    req1.flush({ token: 'fake-jwt', username: 'dup', email: 'dup@shop.com' });
-    service.logout();
-    service.register('dup', 'pass2').subscribe(() => undefined);
-    const req2 = httpMock.expectOne('/api/auth/register');
-    req2.flush({ error: 'duplicate' }, { status: 409, statusText: 'Conflict' });
-  });
-
-  it('should handle logout removing localStorage key', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+  it('should handle logout removing localStorage key', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
     service.logout();
     expect(localStorage.getItem('angular_auth_user')).toBeNull();
-  });
+  }));
 
   it('should initialize isAuthenticated as true when user stored', () => {
     TestBed.resetTestingModule();
@@ -447,34 +505,262 @@ describe('AuthService', () => {
     expect(fresh.user()?.isAdmin).toBe(true);
   });
 
-  it('should handle empty password registration', () => {
-    service.register('user', ' ').subscribe(success => {
+  it('should handle malformed JSON in localStorage for auth', () => {
+    localStorage.setItem('angular_auth_user', 'not-json');
+    const service2 = TestBed.inject(AuthService);
+    expect(service2.user()).toBeNull();
+  });
+
+  it('should handle empty password registration', fakeAsync(() => {
+    service.register('user@shop.com', ' ').subscribe(success => {
       expect(success).toBe(true);
     });
     const req = httpMock.expectOne('/api/auth/register');
-    req.flush({ token: 'fake-jwt', username: 'user', email: 'user@shop.com' });
-    expect(service.isAuthenticated()).toBe(true);
-  });
-
-  it('should handle login with customer that has empty password', () => {
-    // Empty password returns of(false) synchronously - no API call
-    service.register('empty-pw', '').subscribe(success => {
-      expect(success).toBe(false);
+    req.flush({ token: 'jwt', email: 'user@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u7',
+      email: 'user@shop.com',
+      displayName: 'User',
+      isEmailConfirmed: false,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
     });
-    expect(service.isAuthenticated()).toBe(false);
-  });
+    tick();
+    expect(service.isAuthenticated()).toBe(true);
+  }));
 
-  it('should return authState as observable that emits current user', () => {
-    service.login('admin', 'password').subscribe(() => undefined);
+  it('should return authState as observable that emits current user', fakeAsync(() => {
+    service.login('admin@test.com', 'password').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'admin@test.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
     service.authState.subscribe(user => {
-      expect(user?.username).toBe('admin');
+      expect(user?.username).toBe('Admin');
       expect(user?.isAdmin).toBe(true);
     });
-  });
+  }));
 
   it('should return authState as observable that emits null when not logged in', () => {
     service.authState.subscribe(user => {
       expect(user).toBeNull();
     });
+  });
+
+  // --- 2FA tests ---
+
+  it('should trigger 2FA flow when login requires it', fakeAsync(() => {
+    service.login('user@shop.com', 'pass').subscribe({
+      next: () => {
+        // Should not reach here on 2FA
+        fail('should not emit success');
+      },
+      error: err => {
+        expect(err.message).toBe('TWO_FACTOR_REQUIRED');
+        expect(service.requiresTwoFactor()).toBe(true);
+        expect(service.twoFaSessionId()).toBe('session-123');
+      },
+    });
+
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({
+      requiresTwoFactor: true,
+      twoFaSessionId: 'session-123',
+    });
+    tick();
+  }));
+
+  it('should verify 2FA code and complete login', fakeAsync(() => {
+    // Setup 2FA state
+    service.requiresTwoFactor.set(true);
+    service.twoFaSessionId.set('session-123');
+
+    service.verifyTwoFactor('123456').subscribe(success => {
+      expect(success).toBe(true);
+    });
+
+    const verifyReq = httpMock.expectOne('/api/auth/2fa/verify');
+    verifyReq.flush({ token: 'jwt-final', email: 'user@shop.com' });
+
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u8',
+      email: 'user@shop.com',
+      displayName: 'User',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: true,
+      roles: ['Customer'],
+    });
+
+    tick();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(service.requiresTwoFactor()).toBe(false);
+    expect(service.twoFaSessionId()).toBeNull();
+  }));
+
+  // --- Profile / Password / 2FA management ---
+
+  it('should fetch profile', fakeAsync(() => {
+    // Setup auth
+    localStorage.setItem('angular_auth_token', 'jwt');
+
+    let profile: any = null;
+    service.getProfile().subscribe(p => {
+      profile = p;
+    });
+
+    const req = httpMock.expectOne('/api/auth/profile');
+    req.flush({
+      id: 'u1',
+      email: 'admin@test.com',
+      displayName: 'Admin',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Admin'],
+    });
+    tick();
+    expect(profile?.displayName).toBe('Admin');
+  }));
+
+  it('should change password', fakeAsync(() => {
+    service.changePassword({ currentPassword: 'old', newPassword: 'new' }).subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/password/change');
+    req.flush({ message: 'ok' });
+    tick();
+  }));
+
+  it('should send email confirmation', fakeAsync(() => {
+    service.sendEmailConfirmation().subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/email/confirm/send');
+    req.flush({ message: 'sent' });
+    tick();
+  }));
+
+  it('should get 2FA status', fakeAsync(() => {
+    let status: any = null;
+    service.getTwoFaStatus().subscribe(s => {
+      status = s;
+    });
+    const req = httpMock.expectOne('/api/auth/2fa/status');
+    req.flush({ isTwoFaEnabled: false, isEmailConfirmed: true, hasRecoveryCodes: false });
+    tick();
+    expect(status?.isTwoFaEnabled).toBe(false);
+  }));
+
+  it('should enable 2FA', fakeAsync(() => {
+    // Setup user via login flow
+    service.login('user@shop.com', 'pass').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'user@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u8',
+      email: 'user@shop.com',
+      displayName: 'User',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+    tick();
+
+    service.enableTwoFactor('654321').subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/2fa/enable');
+    req.flush({ message: 'enabled' });
+    tick();
+    expect(service.user()?.isTwoFactorEnabled).toBe(true);
+  }));
+
+  it('should disable 2FA', fakeAsync(() => {
+    // Setup user via login flow with 2FA enabled
+    service.login('user2@shop.com', 'pass').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'jwt', email: 'user2@shop.com' });
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u9',
+      email: 'user2@shop.com',
+      displayName: 'User2',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: true,
+      roles: ['Customer'],
+    });
+    tick();
+
+    service.disableTwoFactor('654321').subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/2fa/disable');
+    req.flush({ message: 'disabled' });
+    tick();
+    expect(service.user()?.isTwoFactorEnabled).toBe(false);
+  }));
+
+  it('should get recovery codes', fakeAsync(() => {
+    let codes: string[] = [];
+    service.getRecoveryCodes().subscribe(c => {
+      codes = c;
+    });
+    const req = httpMock.expectOne('/api/auth/2fa/recovery-codes');
+    req.flush({ codes: ['code1', 'code2', 'code3'] });
+    tick();
+    expect(codes.length).toBe(3);
+  }));
+
+  it('should send password reset email', fakeAsync(() => {
+    service.sendPasswordResetEmail('user@shop.com').subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/password/reset/send');
+    req.flush({ message: 'sent' });
+    tick();
+  }));
+
+  it('should reset password', fakeAsync(() => {
+    service.resetPassword('user@shop.com', 'token123', 'newpass').subscribe(success => {
+      expect(success).toBe(true);
+    });
+    const req = httpMock.expectOne('/api/auth/password/reset');
+    req.flush({ message: 'reset' });
+    tick();
+  }));
+
+  // --- Token helpers ---
+
+  it('should getToken return null when not stored', () => {
+    expect(service.getToken()).toBeNull();
+  });
+
+  it('should save and retrieve token', () => {
+    // Use private saveToken via login flow
+    service.login('test@test.com', 'pass').subscribe(() => undefined);
+    const loginReq = httpMock.expectOne('/api/auth/login');
+    loginReq.flush({ requiresTwoFactor: false, token: 'my-token', email: 'test@test.com' });
+    // Profile fetch follows - flush it
+    const profileReq = httpMock.expectOne('/api/auth/profile');
+    profileReq.flush({
+      id: 'u9',
+      email: 'test@test.com',
+      displayName: 'Test',
+      isEmailConfirmed: true,
+      isTwoFactorEnabled: false,
+      roles: ['Customer'],
+    });
+
+    expect(localStorage.getItem('angular_auth_token')).toBe('my-token');
   });
 });

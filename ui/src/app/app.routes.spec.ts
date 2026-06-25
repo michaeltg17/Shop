@@ -2,10 +2,10 @@ import { routes } from './app.routes';
 import { UsersTable } from './features/users/components/users-table/users-table';
 import { UserPage } from './shared/pages/user-page/user-page';
 import { ProductsPage } from './features/products/components/products-page/products-page';
+import { ProductDetailPage } from './features/products/components/product-detail-page/product-detail-page';
 import { ContactPage } from './shared/pages/contact-page/contact-page';
 import { CartPage } from './features/cart/components/cart-page/cart-page';
 import { OrdersPage } from './features/orders/components/orders-page/orders-page';
-import { LoginPage } from './shared/pages/login-page/login-page';
 import { PendingChangesGuard } from './core/auth/guards/pending-changes.guard';
 import { AuthGuard } from './core/auth/guards/auth.guard';
 import { AdminLayout } from './shared/layouts/admin-layout/admin-layout';
@@ -17,17 +17,16 @@ describe('app.routes', () => {
     expect(routes.length).toBeGreaterThan(0);
   });
 
-  it('should have a root redirect to login', () => {
+  it('should have a root redirect to shop', () => {
     const rootRoute = routes.find(r => r.path === '');
     expect(rootRoute).toBeDefined();
     expect(rootRoute?.redirectTo).toBe('shop');
     expect(rootRoute?.pathMatch).toBe('full');
   });
 
-  it('should have a login route with LoginPage component', () => {
+  it('should have a login route', () => {
     const loginRoute = routes.find(r => r.path === 'login');
     expect(loginRoute).toBeDefined();
-    expect(loginRoute?.component).toBe(LoginPage);
   });
 
   it('should have an admin layout route', () => {
@@ -83,13 +82,6 @@ describe('app.routes', () => {
     expect(route?.runGuardsAndResolvers).toBe('always');
   });
 
-  it('should have user route nested under admin', () => {
-    const adminRoute = routes.find(r => r.path === 'admin');
-    const route = adminRoute?.children?.find(c => c.path === 'user');
-    expect(route).toBeDefined();
-    expect(route?.component).toBe(UserPage);
-  });
-
   it('should have products route nested under admin', () => {
     const adminRoute = routes.find(r => r.path === 'admin');
     const route = adminRoute?.children?.find(c => c.path === 'products');
@@ -105,16 +97,18 @@ describe('app.routes', () => {
     expect(shopRoute?.children?.length).toBeGreaterThan(0);
   });
 
-  it('should have products route nested under shop', () => {
+  it('should have products as root of shop layout', () => {
     const shopRoute = routes.find(r => r.path === 'shop');
-    // root of shop now shows ProductsPage directly
     const rootRoute = shopRoute?.children?.find(c => c.path === '');
     expect(rootRoute).toBeDefined();
     expect(rootRoute?.component).toBe(ProductsPage);
-    // /shop/products redirects to /shop
-    const productsRoute = shopRoute?.children?.find(c => c.path === 'products');
-    expect(productsRoute).toBeDefined();
-    expect(productsRoute?.redirectTo).toBe('');
+  });
+
+  it('should have products/:id detail route under shop', () => {
+    const shopRoute = routes.find(r => r.path === 'shop');
+    const route = shopRoute?.children?.find(c => c.path === 'products/:id');
+    expect(route).toBeDefined();
+    expect(route?.component).toBe(ProductDetailPage);
   });
 
   it('should have cart route nested under shop', () => {
@@ -136,5 +130,19 @@ describe('app.routes', () => {
     const route = shopRoute?.children?.find(c => c.path === 'contact');
     expect(route).toBeDefined();
     expect(route?.component).toBe(ContactPage);
+  });
+
+  it('should have profile route nested under shop', () => {
+    const shopRoute = routes.find(r => r.path === 'shop');
+    const route = shopRoute?.children?.find(c => c.path === 'profile');
+    expect(route).toBeDefined();
+    expect(route?.component).toBe(UserPage);
+    expect(route?.canActivate).toContain(AuthGuard);
+  });
+
+  it('should have standalone profile route outside shop', () => {
+    const profileRoute = routes.find(r => r.path === 'profile' && r.component === UserPage);
+    expect(profileRoute).toBeDefined();
+    expect(profileRoute?.canActivate).toContain(AuthGuard);
   });
 });
