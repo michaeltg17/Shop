@@ -229,11 +229,9 @@ describe('UserPage', () => {
     component.newPassword = 'short';
     component.confirmPassword = 'short';
     component.changePassword();
-    expect(snackBarOpen).toHaveBeenCalledWith(
-      'Password must be at least 6 characters',
-      'Dismiss',
-      { duration: 2000 }
-    );
+    expect(snackBarOpen).toHaveBeenCalledWith('Password must be at least 6 characters', 'Dismiss', {
+      duration: 2000,
+    });
   });
 
   it('should change password successfully', fakeAsync(() => {
