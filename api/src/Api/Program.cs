@@ -69,12 +69,20 @@ app.MapOpenApi();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Create roles at startup
+// Run EF migrations then seed default roles
 using (var scope = app.Services.CreateScope())
 {
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    context.Database.Migrate();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    await roleManager.CreateAsync(new IdentityRole("Customer"));
-    await roleManager.CreateAsync(new IdentityRole("Admin"));
+    foreach (var role in new[] { "Customer", "Admin" })
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
 }
 
 // Map endpoints
