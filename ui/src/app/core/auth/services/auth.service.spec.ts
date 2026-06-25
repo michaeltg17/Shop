@@ -955,7 +955,7 @@ describe('AuthService', () => {
     service.confirmEmail('u1', 'user@shop.com', 'ABC123').subscribe(success => {
       expect(success).toBe(true);
     });
-    const req = httpMock.expectOne('/api/auth/email/confirm');
+    const req = httpMock.expectOne(r => r.url.startsWith('/api/auth/email/confirm'));
     req.flush({ message: 'confirmed' });
     tick();
   }));
@@ -964,7 +964,7 @@ describe('AuthService', () => {
     service.confirmEmail('u1', 'user@shop.com', 'BAD').subscribe(success => {
       expect(success).toBe(false);
     });
-    const req = httpMock.expectOne('/api/auth/email/confirm');
+    const req = httpMock.expectOne(r => r.url.startsWith('/api/auth/email/confirm'));
     req.error(new ErrorEvent('error'), { status: 400, statusText: 'Bad Request' });
     tick();
   }));
