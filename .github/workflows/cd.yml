@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Image tag to deploy'
+        description: 'Tag'
         required: false
         default: 'latest'
 
@@ -22,16 +22,11 @@ jobs:
       url: https://dev.shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger dev deployment
+      - name: Deploy dev
         run: |
           set -e
           TAG=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
-          if [ -z "$TAG" ]; then
-            echo "ERROR: TAG is empty"
-            exit 1
-          fi
-          echo "Deploying tag: $TAG"
           BODY="{\"environment\":\"dev\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -f --connect-timeout 10 --max-time 60 \
@@ -50,16 +45,11 @@ jobs:
       url: https://qa.shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger qa deployment
+      - name: Deploy qa
         run: |
           set -e
           TAG=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
-          if [ -z "$TAG" ]; then
-            echo "ERROR: TAG is empty"
-            exit 1
-          fi
-          echo "Deploying tag: $TAG"
           BODY="{\"environment\":\"qa\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -f --connect-timeout 10 --max-time 60 \
@@ -78,16 +68,11 @@ jobs:
       url: https://shop.statikk.mooo.com
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger prod deployment
+      - name: Deploy prod
         run: |
           set -e
           TAG=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
           TAG=${TAG:0:7}
-          if [ -z "$TAG" ]; then
-            echo "ERROR: TAG is empty"
-            exit 1
-          fi
-          echo "Deploying tag: $TAG"
           BODY="{\"environment\":\"prod\",\"tag\":\"${TAG}\"}"
           SIGNATURE=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "${{ secrets.WEBHOOK_SECRET }}" | awk '{print $2}')
           curl -f --connect-timeout 10 --max-time 60 \
