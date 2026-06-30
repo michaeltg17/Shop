@@ -22,6 +22,8 @@ jobs:
       name: dev
       url: https://dev.shop.statikk.mooo.com
     steps:
+      - uses: actions/checkout@v4
+
       - uses: ./.github/actions/deploy
         with:
           environment: dev
@@ -37,6 +39,8 @@ jobs:
       name: qa
       url: https://qa.shop.statikk.mooo.com
     steps:
+      - uses: actions/checkout@v4
+
       - uses: ./.github/actions/deploy
         with:
           environment: qa
@@ -52,6 +56,8 @@ jobs:
       name: prod
       url: https://shop.statikk.mooo.com
     steps:
+      - uses: actions/checkout@v4
+
       - uses: ./.github/actions/deploy
         with:
           environment: prod
