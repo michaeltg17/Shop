@@ -1,13 +1,18 @@
 name: deploy
+description: Deploy to environment via webhook
 
 inputs:
   environment:
+    description: Target environment (dev, qa, prod)
     required: true
   tag:
+    description: Git commit SHA or tag to deploy
     required: true
   deploy_user:
+    description: Username for deploy server authentication
     required: true
   deploy_password:
+    description: Password for deploy server authentication
     required: true
 
 runs:
