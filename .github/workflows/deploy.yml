@@ -10,6 +10,8 @@ on:
         required: true
         type: string
     secrets:
+      DEPLOY_USER:
+        required: true
       DEPLOY_PASSWORD:
         required: true
 
@@ -24,7 +26,7 @@ jobs:
           TAG=${TAG:0:7}
           BODY="{\"project\":\"shop\",\"environment\":\"${{ inputs.environment }}\",\"tag\":\"${TAG}\"}"
           curl -sf --connect-timeout 10 --max-time 60 \
-            -u "deploy:${{ secrets.DEPLOY_PASSWORD }}" \
+            -u "${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_PASSWORD }}" \
             -H "Content-Type: application/json" \
             -d "$BODY" \
             -w "\nHTTP_CODE: %{http_code}\n" \

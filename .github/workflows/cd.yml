@@ -11,7 +11,7 @@ on:
     inputs:
       tag:
         description: 'Tag'
-        required: false
+        required: true
         default: 'latest'
 
 if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
