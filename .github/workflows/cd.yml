@@ -15,38 +15,45 @@ on:
         default: 'latest'
 
 if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
-env:
-  TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
 
 jobs:
   deploy-dev:
+    runs-on: ubuntu-latest
     environment:
       name: dev
       url: https://dev.shop.statikk.mooo.com
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: dev
-      tag: ${{ env.TAG }}
-    secrets: inherit
+    steps:
+      - uses: ./.github/actions/deploy
+        with:
+          environment: dev
+          tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
+          deploy_user: ${{ secrets.DEPLOY_USER }}
+          deploy_password: ${{ secrets.DEPLOY_PASSWORD }}
 
   deploy-qa:
     needs: deploy-dev
+    runs-on: ubuntu-latest
     environment:
       name: qa
       url: https://qa.shop.statikk.mooo.com
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: qa
-      tag: ${{ env.TAG }}
-    secrets: inherit
+    steps:
+      - uses: ./.github/actions/deploy
+        with:
+          environment: qa
+          tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
+          deploy_user: ${{ secrets.DEPLOY_USER }}
+          deploy_password: ${{ secrets.DEPLOY_PASSWORD }}
 
   deploy-prod:
     needs: deploy-qa
+    runs-on: ubuntu-latest
     environment:
       name: prod
       url: https://shop.statikk.mooo.com
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: prod
-      tag: ${{ env.TAG }}
-    secrets: inherit
+    steps:
+      - uses: ./.github/actions/deploy
+        with:
+          environment: prod
+          tag: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.event.workflow_run.head_sha }}
+          deploy_user: ${{ secrets.DEPLOY_USER }}
+          deploy_password: ${{ secrets.DEPLOY_PASSWORD }}

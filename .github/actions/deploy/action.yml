@@ -1,0 +1,28 @@
+name: deploy
+
+inputs:
+  environment:
+    required: true
+  tag:
+    required: true
+  deploy_user:
+    required: true
+  deploy_password:
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Deploy to ${{ inputs.environment }}
+      run: |
+        set -e
+        TAG=${{ inputs.tag }}
+        TAG=${TAG:0:7}
+        BODY="{\"project\":\"shop\",\"environment\":\"${{ inputs.environment }}\",\"tag\":\"${TAG}\"}"
+        curl -sf --connect-timeout 10 --max-time 60 \
+          -u "${{ inputs.deploy_user }}:${{ inputs.deploy_password }}" \
+          -H "Content-Type: application/json" \
+          -d "$BODY" \
+          -w "\nHTTP_CODE: %{http_code}\n" \
+          https://statikk.mooo.com/deploy
+      shell: bash
